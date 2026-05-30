@@ -7,6 +7,7 @@ import { supabase } from '../lib/supabaseClient';
 export default function WizardForm() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [currentBookingId, setCurrentBookingId] = useState<string | null>(null);
   const sigCanvas = useRef<SignatureCanvas>(null);
 
   // Form State
@@ -17,6 +18,8 @@ export default function WizardForm() {
     address: '',
     emergencyContactName: '',
     emergencyContactPhone: '',
+    startDateTime: '',
+    endDateTime: '',
   });
 
   const [files, setFiles] = useState<{
@@ -32,6 +35,16 @@ export default function WizardForm() {
   });
 
   const [agreement, setAgreement] = useState(false);
+
+  const calculatePrice = () => {
+    if (!formData.startDateTime || !formData.endDateTime) return 100;
+    const start = new Date(formData.startDateTime).getTime();
+    const end = new Date(formData.endDateTime).getTime();
+    const diffTime = end - start;
+    if (diffTime <= 0) return 100; // Minimum RM100
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays * 100;
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -62,9 +75,10 @@ export default function WizardForm() {
     setLoading(true);
     try {
       const signatureImage = sigCanvas.current?.getTrimmedCanvas().toDataURL('image/png') as string;
-      
       const { generateAndUploadPDF } = await import('../lib/pdfGenerator');
       
+      const totalPrice = calculatePrice();
+
       // 1. Upload Selfie to Storage
       let selfiePath = null;
       if (files.selfie) {
@@ -89,7 +103,7 @@ export default function WizardForm() {
       }
 
       // 3. Generate and Upload PDF Contract
-      const { pdfPath } = await generateAndUploadPDF(formData, signatureImage, files.selfie);
+      const { pdfPath } = await generateAndUploadPDF(formData, signatureImage, files.selfie, totalPrice);
 
       // 4. Insert Borrower
       const { data: borrower, error: borrowerError } = await supabase.from('borrowers').insert({
@@ -107,10 +121,15 @@ export default function WizardForm() {
       const { data: booking, error: bookingError } = await supabase.from('bookings').insert({
         borrower_id: borrower.id,
         vehicle_model: 'Proton Persona',
-        maintenance_share_amount: 100.00
+        start_datetime: formData.startDateTime,
+        end_datetime: formData.endDateTime,
+        maintenance_share_amount: totalPrice,
+        payment_status: 'Pending' // Set explicit initial state for payment
       }).select().single();
 
       if (bookingError) throw bookingError;
+      
+      setCurrentBookingId(booking.id);
 
       // 6. Insert Media
       await supabase.from('verification_media').insert({
@@ -118,14 +137,33 @@ export default function WizardForm() {
         ic_photo_url: icPath,
         license_photo_url: licensePath,
         selfie_ic_url: selfiePath,
-        digital_signature_url: pdfPath // We store the contract PDF path
+        digital_signature_url: pdfPath 
       });
       
-      alert('Verification submitted successfully! PDF generated and stored.');
-      setStep(4);
+      setStep(4); // Move to Payment Step
     } catch (error) {
       console.error(error);
-      alert('An error occurred during submission.');
+      alert('An error occurred during submission. Please check console for details.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSimulatePayment = async () => {
+    setLoading(true);
+    try {
+      // Simulate Payment Gateway call (ToyyibPay/Stripe)
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Update Payment Status in DB
+      if (currentBookingId) {
+         await supabase.from('bookings').update({ payment_status: 'Paid', bank_reference: 'MOCK_FPX_' + Date.now() }).eq('id', currentBookingId);
+      }
+      
+      alert('Payment Successful!');
+      setStep(5); // Success Step
+    } catch (error) {
+      alert('Payment failed.');
     } finally {
       setLoading(false);
     }
@@ -135,7 +173,7 @@ export default function WizardForm() {
     <div className="glass-container max-w-2xl w-full">
       {step < 4 && (
         <div className="mb-6 flex justify-between items-center text-sm">
-          <span className={step >= 1 ? 'text-accent-color font-bold' : 'text-text-secondary'}>1. Profile</span>
+          <span className={step >= 1 ? 'text-accent-color font-bold' : 'text-text-secondary'}>1. Booking & Profile</span>
           <span className="text-border-color">──</span>
           <span className={step >= 2 ? 'text-accent-color font-bold' : 'text-text-secondary'}>2. KYC</span>
           <span className="text-border-color">──</span>
@@ -145,7 +183,24 @@ export default function WizardForm() {
 
       {step === 1 && (
         <div>
-          <h2 className="mb-4">User Profile & Particulars</h2>
+          <h2 className="mb-4">Booking Details & Profile</h2>
+          
+          <div className="flex gap-4 mb-4">
+            <div className="form-group w-full">
+              <label className="form-label">Start Date & Time</label>
+              <input type="datetime-local" name="startDateTime" value={formData.startDateTime} onChange={handleInputChange} className="form-input" required />
+            </div>
+            <div className="form-group w-full">
+              <label className="form-label">End Date & Time</label>
+              <input type="datetime-local" name="endDateTime" value={formData.endDateTime} onChange={handleInputChange} className="form-input" required />
+            </div>
+          </div>
+          
+          <div className="p-4 mb-4 rounded-lg bg-surface-hover text-center">
+            <p className="text-sm text-text-secondary mb-1">Estimated Cost (RM 100/day)</p>
+            <h3 className="text-2xl text-accent-color">RM {calculatePrice().toFixed(2)}</h3>
+          </div>
+
           <div className="form-group">
             <label className="form-label">Full Name</label>
             <input type="text" name="fullName" value={formData.fullName} onChange={handleInputChange} className="form-input" required />
@@ -172,7 +227,7 @@ export default function WizardForm() {
             </div>
           </div>
           <div className="flex justify-end mt-4">
-            <button className="btn btn-primary" onClick={nextStep} disabled={!formData.fullName || !formData.icNumber}>Next Step</button>
+            <button className="btn btn-primary" onClick={nextStep} disabled={!formData.fullName || !formData.icNumber || !formData.startDateTime}>Next Step</button>
           </div>
         </div>
       )}
@@ -216,6 +271,7 @@ export default function WizardForm() {
             <p className="mb-2"><strong>2. TANGGUNGJAWAB KEROSAKAN & KEMALANGAN:</strong> Peminjam mengaku bertanggungjawab sepenuhnya ke atas keselamatan kenderaan sepanjang tempoh jagaan. Sekiranya berlaku sebarang kemalangan, kerosakan, atau kehilangan kenderaan akibat kecuaian peminjam, Peminjam WAJIB menanggung 100% kos pembaikan kenderaan Pemilik serta ganti rugi pihak ketiga secara tunai atau ansuran.</p>
             <p className="mb-2"><strong>3. SAMAN & PENYALAHGUNAAN:</strong> Sebarang saman lalu lintas (PDRM/JPJ/PBT) atau salah guna kenderaan untuk aktiviti jenayah sepanjang tempoh slot ini adalah tanggungan mutlak Peminjam.</p>
             <p><strong>4. CAGARAN KESELAMATAN:</strong> Peminjam bersetuju mendepositkan wang jaminan (Security Deposit) yang akan dipulangkan semula dalam tempoh 3-5 hari selepas kenderaan dipulangkan dengan selamat.</p>
+            <p className="mt-4 text-accent-color font-bold">Total Cost: RM {calculatePrice().toFixed(2)}</p>
           </div>
 
           <label className="flex items-center gap-2 mb-4 cursor-pointer">
@@ -238,7 +294,7 @@ export default function WizardForm() {
           <div className="flex justify-between mt-4">
             <button className="btn btn-secondary" onClick={prevStep} disabled={loading}>Back</button>
             <button className="btn btn-primary" onClick={handleSubmit} disabled={loading || !agreement}>
-              {loading ? 'Submitting...' : 'Sign & Submit'}
+              {loading ? 'Processing...' : 'Sign & Proceed to Payment'}
             </button>
           </div>
         </div>
@@ -246,12 +302,45 @@ export default function WizardForm() {
 
       {step === 4 && (
         <div className="text-center py-8">
+           <h2 className="mb-2">Payment Required</h2>
+           <p className="text-text-secondary mb-6">Your verification is submitted successfully. Please complete the payment to finalize the booking.</p>
+           
+           <div className="p-6 mb-6 rounded-lg border border-border-color bg-surface-hover inline-block text-left w-full max-w-sm mx-auto">
+              <div className="flex justify-between mb-2 border-b border-border-color pb-2">
+                <span>Vehicle:</span>
+                <span className="font-bold text-white">Proton Persona</span>
+              </div>
+              <div className="flex justify-between mb-2 border-b border-border-color pb-2">
+                <span>Booking Amount:</span>
+                <span className="font-bold text-white">RM {calculatePrice().toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between pt-2">
+                <span className="text-accent-color font-bold text-lg">Total to Pay:</span>
+                <span className="font-bold text-accent-color text-lg">RM {calculatePrice().toFixed(2)}</span>
+              </div>
+           </div>
+
+           <div>
+            <button className="btn btn-primary w-full max-w-sm mb-2" onClick={handleSimulatePayment} disabled={loading}>
+              {loading ? 'Redirecting to FPX / Bank...' : 'Pay with FPX / Bank (Simulate)'}
+            </button>
+            <p className="text-xs text-text-secondary mt-4">(This is a simulated payment gateway. Clicking Pay will update your Supabase database payment_status to 'Paid')</p>
+           </div>
+        </div>
+      )}
+
+      {step === 5 && (
+        <div className="text-center py-8">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-success-color bg-opacity-20 text-success-color mb-4">
             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
           </div>
-          <h2 className="mb-2">Verification Complete</h2>
-          <p className="mb-6">Your details have been securely saved and the agreement PDF has been generated.</p>
-          <button className="btn btn-primary" onClick={() => setStep(1)}>Start New Application</button>
+          <h2 className="mb-2">Booking & Verification Complete!</h2>
+          <p className="mb-6">Your details have been securely saved, agreement signed, and payment received.</p>
+          <button className="btn btn-primary" onClick={() => {
+            setStep(1);
+            setFormData({ ...formData, startDateTime: '', endDateTime: '' });
+            setAgreement(false);
+          }}>Start New Application</button>
         </div>
       )}
     </div>

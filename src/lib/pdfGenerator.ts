@@ -4,7 +4,8 @@ import { supabase } from './supabaseClient';
 export async function generateAndUploadPDF(
   formData: any,
   signatureImage: string,
-  selfieImage: File | null
+  selfieImage: File | null,
+  totalPrice: number
 ) {
   const doc = new jsPDF();
   
@@ -21,6 +22,12 @@ export async function generateAndUploadPDF(
   doc.text(`Address: ${formData.address}`, 20, 75);
   doc.text(`Emergency Contact: ${formData.emergencyContactName} (${formData.emergencyContactPhone})`, 20, 85);
 
+  // Booking Details
+  doc.setFontSize(11);
+  doc.text(`Booking Start: ${new Date(formData.startDateTime).toLocaleString()}`, 20, 95);
+  doc.text(`Booking End: ${new Date(formData.endDateTime).toLocaleString()}`, 20, 105);
+  doc.text(`Total Maintenance Share (Cost): RM ${totalPrice.toFixed(2)}`, 20, 115);
+
   // Agreement Terms
   doc.setFontSize(10);
   const terms = [
@@ -30,7 +37,7 @@ export async function generateAndUploadPDF(
     "4. CAGARAN KESELAMATAN: Peminjam bersetuju mendepositkan wang jaminan."
   ];
   
-  let y = 100;
+  let y = 130;
   terms.forEach(term => {
     doc.text(term, 20, y, { maxWidth: 170 });
     y += 15;
