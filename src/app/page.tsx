@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import WizardForm from '../components/WizardForm';
 import Auth from '../components/Auth';
 import { supabase } from '../lib/supabaseClient';
@@ -57,7 +57,11 @@ export default function Home() {
         <p className="subtitle">Secure Car Sharing Verification & Document Management</p>
       </div>
 
-      {!session ? <Auth /> : <WizardForm />}
+      {!session ? <Auth /> : (
+        <Suspense fallback={<div>Loading form...</div>}>
+          <WizardForm />
+        </Suspense>
+      )}
     </main>
   );
 }

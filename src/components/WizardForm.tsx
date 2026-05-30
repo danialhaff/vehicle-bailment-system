@@ -1,14 +1,26 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import SignatureCanvas from 'react-signature-canvas';
 import { supabase } from '../lib/supabaseClient';
+import { useSearchParams } from 'next/navigation';
 
 export default function WizardForm() {
-  const [step, setStep] = useState(1);
+  const searchParams = useSearchParams();
+  const paymentStatus = searchParams.get('payment');
+
+  const [step, setStep] = useState(paymentStatus === 'success' ? 5 : 1);
   const [loading, setLoading] = useState(false);
   const [currentBookingId, setCurrentBookingId] = useState<string | null>(null);
   const sigCanvas = useRef<SignatureCanvas>(null);
+
+  useEffect(() => {
+    if (paymentStatus === 'success') {
+      setStep(5);
+    } else if (paymentStatus === 'failed') {
+      alert('Payment failed. Please try again.');
+    }
+  }, [paymentStatus]);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -152,19 +164,27 @@ export default function WizardForm() {
   const handleSimulatePayment = async () => {
     setLoading(true);
     try {
-      // Simulate Payment Gateway call (ToyyibPay/Stripe)
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Update Payment Status in DB
-      if (currentBookingId) {
-         await supabase.from('bookings').update({ payment_status: 'Paid', bank_reference: 'MOCK_FPX_' + Date.now() }).eq('id', currentBookingId);
+      const response = await fetch('/api/create-bill', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          bookingId: currentBookingId,
+          fullName: formData.fullName,
+          email: 'customer@example.com', // If you have auth email, pass it here
+          amount: calculatePrice(),
+          icNumber: formData.icNumber
+        })
+      });
+
+      const data = await response.json();
+      if (data.url) {
+        window.location.href = data.url; // Redirect to ToyyibPay
+      } else {
+        throw new Error('No URL returned from ToyyibPay');
       }
-      
-      alert('Payment Successful!');
-      setStep(5); // Success Step
     } catch (error) {
-      alert('Payment failed.');
-    } finally {
+      console.error(error);
+      alert('Payment initialization failed. Please try again.');
       setLoading(false);
     }
   };
