@@ -11,57 +11,80 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setLoading(false);
     });
-
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
     });
-
     return () => subscription.unsubscribe();
   }, []);
 
   if (loading) {
     return (
-      <main className="main-container text-center">
-        <p>Loading...</p>
-      </main>
+      <div className="page" style={{ justifyContent: 'center' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ width: 40, height: 40, border: '3px solid var(--border)', borderTopColor: 'var(--primary)', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 1rem' }} />
+          <p style={{ color: 'var(--text-3)', fontSize: '0.85rem' }}>Memuatkan...</p>
+        </div>
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
     );
   }
 
   return (
-    <main className="main-container">
-      {/* Dynamic Background Effects */}
-      <div className="bg-effect effect-1"></div>
-      <div className="bg-effect effect-2"></div>
-      
-      {session && (
-        <button 
-          onClick={() => supabase.auth.signOut()} 
-          className="absolute top-4 right-4 text-sm font-semibold text-text-secondary hover:text-error-color transition-colors"
-        >
-          Log Out
-        </button>
-      )}
+    <div className="page">
+      {/* Top Navigation Bar */}
+      <div className="topbar">
+        <div className="topbar-logo">
+          <div className="topbar-logo-icon">🚗</div>
+          VehicleShare
+        </div>
 
-      <div className="header-container">
-        <h1 className="title">
-          Vehicle Bailment System
-        </h1>
-        <p className="subtitle">Secure Car Sharing Verification & Document Management</p>
+        {session && (
+          <button className="btn-logout" onClick={() => supabase.auth.signOut()}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+              <polyline points="16 17 21 12 16 7"/>
+              <line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+            Log Keluar
+          </button>
+        )}
       </div>
 
-      {!session ? <Auth /> : (
-        <Suspense fallback={<div>Loading form...</div>}>
+      {/* Hero Header */}
+      <div className="hero">
+        <div className="hero-badge">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="8"/></svg>
+          Sistem Disahkan & Selamat
+        </div>
+        <h1 className="hero-title">
+          {session ? 'Tempahan Kenderaan' : 'Kongsi Kereta,\nBukan Risiko'}
+        </h1>
+        <p className="hero-subtitle">
+          {session
+            ? `Selamat datang kembali! Lengkapkan borang di bawah untuk meminjam kenderaan.`
+            : 'Platform pengesahan pinjaman kenderaan yang selamat dengan e-tandatangan digital dan bayaran FPX.'}
+        </p>
+      </div>
+
+      {/* Main Content */}
+      {!session ? (
+        <Auth />
+      ) : (
+        <Suspense fallback={<div style={{ color: 'var(--text-3)', fontSize: '0.85rem' }}>Memuatkan borang...</div>}>
           <WizardForm />
         </Suspense>
       )}
-    </main>
+
+      {/* Footer */}
+      <div style={{ marginTop: '2rem', textAlign: 'center', fontSize: '0.75rem', color: 'var(--text-3)', zIndex: 10 }}>
+        <p>© 2025 VehicleShare · Selamat · Selamat · Dipercayai</p>
+      </div>
+
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    </div>
   );
 }
