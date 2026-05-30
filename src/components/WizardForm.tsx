@@ -61,7 +61,7 @@ export default function WizardForm() {
     
     setLoading(true);
     try {
-      const signatureImage = sigCanvas.current?.getTrimmedCanvas().toDataURL('image/png');
+      const signatureImage = sigCanvas.current?.getTrimmedCanvas().toDataURL('image/png') as string;
       
       const { generateAndUploadPDF } = await import('../lib/pdfGenerator');
       
