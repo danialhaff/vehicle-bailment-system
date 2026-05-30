@@ -71,18 +71,21 @@ export default function WizardForm() {
         const { data, error } = await supabase.storage
           .from('verification-documents')
           .upload(`selfies/${Date.now()}_${files.selfie.name}`, files.selfie);
-        if (!error && data) selfiePath = data.path;
+        if (error) throw error;
+        selfiePath = data.path;
       }
 
-      // 2. Upload IC and License (Similar logic)
+      // 2. Upload IC and License
       let icPath = null, licensePath = null;
       if (files.icFront) {
-        const { data } = await supabase.storage.from('verification-documents').upload(`ic/${Date.now()}_${files.icFront.name}`, files.icFront);
-        if (data) icPath = data.path;
+        const { data, error } = await supabase.storage.from('verification-documents').upload(`ic/${Date.now()}_${files.icFront.name}`, files.icFront);
+        if (error) throw error;
+        icPath = data.path;
       }
       if (files.license) {
-        const { data } = await supabase.storage.from('verification-documents').upload(`license/${Date.now()}_${files.license.name}`, files.license);
-        if (data) licensePath = data.path;
+        const { data, error } = await supabase.storage.from('verification-documents').upload(`license/${Date.now()}_${files.license.name}`, files.license);
+        if (error) throw error;
+        licensePath = data.path;
       }
 
       // 3. Generate and Upload PDF Contract
