@@ -104,9 +104,7 @@ export default function WizardForm() {
       const { data: booking, error: bookingError } = await supabase.from('bookings').insert({
         borrower_id: borrower.id,
         vehicle_model: 'Proton Persona',
-        maintenance_share_amount: 100.00,
-        payment_status: 'Pending',
-        booking_status: 'Pending Verification'
+        maintenance_share_amount: 100.00
       }).select().single();
 
       if (bookingError) throw bookingError;
