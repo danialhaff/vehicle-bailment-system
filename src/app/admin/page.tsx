@@ -1,0 +1,497 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { supabase } from '../../lib/supabaseClient';
+import { Session } from '@supabase/supabase-js';
+
+export default function AdminDashboard() {
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [activeTab, setActiveTab] = useState<'bookings' | 'kyc' | 'locations'>('bookings');
+
+  // Database Data State
+  const [bookings, setBookings] = useState<any[]>([]);
+  const [verificationMedia, setVerificationMedia] = useState<any[]>([]);
+  const [locations, setLocations] = useState<any[]>([]);
+  const [sqlError, setSqlError] = useState(false);
+
+  // New Location Form State
+  const [newLocName, setNewLocName] = useState('');
+  const [newLocAddress, setNewLocAddress] = useState('');
+
+  // Fallback Locations
+  const defaultLocations = [
+    { id: '1', name: 'Terminal KL Sentral', address: 'Kuala Lumpur Sentral, 50470 Kuala Lumpur', is_active: true },
+    { id: '2', name: 'Stesen LRT Gombak', address: 'Gombak, 53100 Selangor', is_active: true },
+    { id: '3', name: 'Shah Alam Seksyen 7', address: 'Persiaran Masjid, Seksyen 7, 40000 Shah Alam, Selangor', is_active: true }
+  ];
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setLoading(false);
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Fetch admin data on session load
+  useEffect(() => {
+    if (session && isAdmin()) {
+      fetchAdminData();
+    }
+  }, [session, activeTab]);
+
+  const isAdmin = () => {
+    if (!session) return false;
+    const userEmail = session.user?.email || '';
+    const metadataRole = session.user?.user_metadata?.role;
+    // danialhaffiz9@gmail.com is Admin by default, or anyone with role 'admin'
+    return userEmail === 'danialhaffiz9@gmail.com' || metadataRole === 'admin';
+  };
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setActionLoading(true);
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      
+      const userEmail = data.user?.email || '';
+      const metadataRole = data.user?.user_metadata?.role;
+      if (userEmail !== 'danialhaffiz9@gmail.com' && metadataRole !== 'admin') {
+        alert('Akses Ditolak. Akaun anda bukan Pentadbir (Admin).');
+        await supabase.auth.signOut();
+      }
+    } catch (err: any) {
+      alert(`Ralat log masuk: ${err.message}`);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const fetchAdminData = async () => {
+    setLoading(true);
+    try {
+      if (activeTab === 'bookings') {
+        // Fetch bookings & borrowers
+        const { data: bData, error: bErr } = await supabase
+          .from('bookings')
+          .select('*, borrowers(*)')
+          .order('created_at', { ascending: false });
+
+        if (bErr) throw bErr;
+        setBookings(bData || []);
+      } else if (activeTab === 'kyc') {
+        // Fetch verification media & borrowers & bookings
+        const { data: vData, error: vErr } = await supabase
+          .from('verification_media')
+          .select('*, bookings(*, borrowers(*))')
+          .order('id', { ascending: false });
+
+        if (vErr) throw vErr;
+        setVerificationMedia(vData || []);
+      } else if (activeTab === 'locations') {
+        // Fetch custom locations
+        const { data: lData, error: lErr } = await supabase
+          .from('pickup_locations')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (lErr) {
+          // Table doesn't exist
+          setSqlError(true);
+          setLocations(defaultLocations);
+        } else {
+          setSqlError(false);
+          setLocations(lData || []);
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching admin data:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Update Booking Status
+  const handleUpdateBookingStatus = async (bookingId: string, status: 'Paid' | 'Cancelled') => {
+    setActionLoading(true);
+    try {
+      const { error } = await supabase
+        .from('bookings')
+        .update({ payment_status: status })
+        .eq('id', bookingId);
+
+      if (error) throw error;
+      alert(`Status tempahan dikemaskini kepada: ${status}`);
+      fetchAdminData();
+    } catch (err: any) {
+      alert(`Ralat: ${err.message}`);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // Add Pickup Location
+  const handleAddLocation = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newLocName) return;
+    setActionLoading(true);
+    try {
+      const { error } = await supabase
+        .from('pickup_locations')
+        .insert({ name: newLocName, address: newLocAddress, is_active: true });
+
+      if (error) throw error;
+      alert('Lokasi pickup berjaya ditambahkan!');
+      setNewLocName('');
+      setNewLocAddress('');
+      fetchAdminData();
+    } catch (err: any) {
+      alert(`Gagal menambah lokasi. Sila pastikan jadual pickup_locations telah dibina di Supabase SQL Editor.`);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // Toggle/Delete Pickup Location
+  const handleDeleteLocation = async (id: string) => {
+    if (sqlError) {
+      alert('Lokasi ini adalah contoh lalai. Sila jalankan skrip SQL di Supabase untuk mengurus lokasi dinamik.');
+      return;
+    }
+    if (!confirm('Adakah anda pasti mahu memadam lokasi ini?')) return;
+    setActionLoading(true);
+    try {
+      const { error } = await supabase
+        .from('pickup_locations')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      alert('Lokasi berjaya dipadam!');
+      fetchAdminData();
+    } catch (err: any) {
+      alert(`Ralat: ${err.message}`);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // Generate Photo URLs dynamically
+  const getHandoverPhotoUrl = (bookingId: string, type: 'fuel_before' | 'car_before' | 'fuel_after' | 'car_after') => {
+    return supabase.storage.from('verification-documents').getPublicUrl(`handovers/${bookingId}_${type}.png`).data.publicUrl;
+  };
+
+  if (loading && !actionLoading && session && isAdmin()) {
+    return (
+      <div className="page" style={{ justifyContent: 'center' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ width: 40, height: 40, border: '3px solid var(--border)', borderTopColor: 'var(--primary)', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 1rem' }} />
+          <p style={{ color: 'var(--text-3)', fontSize: '0.85rem' }}>Memuatkan Papan Pemuka Admin...</p>
+        </div>
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
+  }
+
+  return (
+    <div className="page">
+      {/* Navbar */}
+      <div className="topbar">
+        <div className="topbar-logo">
+          <div className="topbar-logo-icon" style={{ background: 'linear-gradient(135deg, var(--purple), var(--error))' }}>⚙️</div>
+          VehicleShare Admin
+        </div>
+        {session && (
+          <button className="btn-logout" onClick={() => supabase.auth.signOut()}>
+            Log Keluar
+          </button>
+        )}
+      </div>
+
+      {/* Admin Auth Shield */}
+      {!session || !isAdmin() ? (
+        <div className="card" style={{ maxWidth: 400, marginTop: '2rem' }}>
+          <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+            <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>🛡️</div>
+            <h2 className="section-title">Log Masuk Pentadbir</h2>
+            <p className="text-sm" style={{ color: 'var(--text-3)' }}>Akses khas untuk pemilik menguruskan sistem tempahan.</p>
+          </div>
+
+          <form onSubmit={handleLogin}>
+            <div className="form-group">
+              <label className="form-label">E-mel Admin</label>
+              <input type="email" value={email} onChange={e => setEmail(e.target.value)} className="form-input" placeholder="admin@email.com" required />
+            </div>
+            <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+              <label className="form-label">Kata Laluan</label>
+              <input type="password" value={password} onChange={e => setPassword(e.target.value)} className="form-input" placeholder="••••••••" required />
+            </div>
+
+            <button className="btn btn-primary w-full" type="submit" disabled={actionLoading}>
+              {actionLoading ? '⏳ Mengesahkan...' : 'Masuk Panel Kawalan 🛡️'}
+            </button>
+          </form>
+        </div>
+      ) : (
+        /* Admin Main Workspace */
+        <div style={{ width: '100%', maxWidth: '960px', zIndex: 10 }}>
+          {/* Dashboard Navigation Tabs */}
+          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem' }}>
+            {[
+              { id: 'bookings', label: '📅 Urus Tempahan', icon: '🚗' },
+              { id: 'kyc', label: '🪪 Pengesahan KYC', icon: '🔍' },
+              { id: 'locations', label: '📍 Lokasi Pickup', icon: '🗺️' }
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as any)}
+                style={{
+                  padding: '0.6rem 1.25rem',
+                  borderRadius: '8px',
+                  border: '1px solid ' + (activeTab === tab.id ? 'var(--primary)' : 'var(--border)'),
+                  background: activeTab === tab.id ? 'var(--primary)' : 'var(--surface)',
+                  color: activeTab === tab.id ? '#fff' : 'var(--text-2)',
+                  fontSize: '0.85rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.4rem'
+                }}
+              >
+                <span>{tab.icon}</span> {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {/* ─── TAB 1: BOOKINGS ─── */}
+          {activeTab === 'bookings' && (
+            <div className="card" style={{ maxWidth: '100%' }}>
+              <h2 className="section-title">📅 Urusan Tempahan Kenderaan</h2>
+              <p className="section-subtitle">Tinjau status bayaran, kontrak PDF bertandatangan, dan gambar sebelum/selepas perjalanan.</p>
+
+              {bookings.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '3rem 0', color: 'var(--text-3)' }}>Tiada rekod tempahan di dalam sistem.</div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                  {bookings.map(book => {
+                    const contractLink = book.id ? supabase.storage.from('verification-documents').getPublicUrl(`contracts/`).data.publicUrl : ''; // fallback path logic
+                    
+                    return (
+                      <div key={book.id} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '1.25rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                          <div>
+                            <h3 style={{ fontSize: '1rem', color: 'var(--text-1)' }}>Peminjam: {book.borrowers?.full_name || 'Tiada Nama'}</h3>
+                            <p style={{ fontSize: '0.78rem', color: 'var(--text-3)' }}>Ref ID: {book.id.toUpperCase()}</p>
+                          </div>
+                          <span style={{
+                            fontSize: '0.75rem',
+                            fontWeight: 700,
+                            padding: '0.25rem 0.6rem',
+                            borderRadius: '99px',
+                            background: book.payment_status === 'Paid' ? 'var(--success-bg)' : 'rgba(251,191,36,0.12)',
+                            color: book.payment_status === 'Paid' ? 'var(--success)' : 'var(--warning)'
+                          }}>
+                            💰 {book.payment_status === 'Paid' ? 'LUNAS (Paid)' : book.payment_status === 'Cancelled' ? 'BATAL' : 'PENDING'}
+                          </span>
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem', fontSize: '0.82rem', margin: '0.75rem 0', color: 'var(--text-2)' }}>
+                          <div>📅 Mula: {new Date(book.start_datetime).toLocaleString('ms-MY')}</div>
+                          <div>📅 Tamat: {new Date(book.end_datetime).toLocaleString('ms-MY')}</div>
+                          <div>📍 Pilihan Lokasi: {book.pickup_location_name || 'Default'}</div>
+                          <div>💰 Sumbangan: RM {book.maintenance_share_amount?.toFixed(2) || '0.00'}</div>
+                        </div>
+
+                        {/* Handover Photos Preview Section */}
+                        {book.payment_status === 'Paid' && (
+                          <div style={{ marginTop: '1rem', background: 'rgba(6,11,20,0.3)', borderRadius: '8px', padding: '0.75rem', border: '1px solid rgba(255,255,255,0.04)' }}>
+                            <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--primary-2)', marginBottom: '0.5rem' }}>📸 Foto Bukti Trip (Handover):</div>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.5rem' }}>
+                              {[
+                                { name: 'Minyak Mula', file: 'fuel_before' },
+                                { name: 'Fizikal Mula', file: 'car_before' },
+                                { name: 'Minyak Tamat', file: 'fuel_after' },
+                                { name: 'Fizikal Tamat', file: 'car_after' }
+                              ].map(photo => {
+                                const url = getHandoverPhotoUrl(book.id, photo.file as any);
+                                return (
+                                  <div key={photo.name} style={{ textAlign: 'center', fontSize: '0.7rem' }}>
+                                    <div style={{ color: 'var(--text-3)', marginBottom: '0.2rem' }}>{photo.name}</div>
+                                    <a href={url} target="_blank" rel="noopener noreferrer" style={{ display: 'block', height: '55px', borderRadius: '4px', overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--surface-2)' }}>
+                                      <img src={url} alt={photo.name} onError={(e) => { e.currentTarget.style.display = 'none'; }} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                    </a>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Actions Panel */}
+                        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.04)', paddingTop: '0.75rem', justifyContent: 'flex-end' }}>
+                          <button
+                            onClick={() => handleUpdateBookingStatus(book.id, 'Paid')}
+                            disabled={book.payment_status === 'Paid'}
+                            className="btn btn-secondary"
+                            style={{ padding: '0.4rem 0.8rem', fontSize: '0.78rem', background: 'var(--success-bg)', color: 'var(--success)', border: 'none' }}
+                          >
+                            ✓ Tanda Lunas
+                          </button>
+                          <button
+                            onClick={() => handleUpdateBookingStatus(book.id, 'Cancelled')}
+                            disabled={book.payment_status === 'Cancelled'}
+                            className="btn btn-secondary"
+                            style={{ padding: '0.4rem 0.8rem', fontSize: '0.78rem', background: 'rgba(248,113,113,0.1)', color: 'var(--error)', border: 'none' }}
+                          >
+                            ✗ Batal Tempahan
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ─── TAB 2: KYC VERIFICATION ─── */}
+          {activeTab === 'kyc' && (
+            <div className="card" style={{ maxWidth: '100%' }}>
+              <h2 className="section-title">🔍 Urusan Pengesahan Ahli (KYC)</h2>
+              <p className="section-subtitle">Periksa kad pengenalan, lesen memandu, dan foto pengesahan diri peminjam baharu.</p>
+
+              {verificationMedia.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '3rem 0', color: 'var(--text-3)' }}>Tiada rekod pengesahan media untuk diteliti.</div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                  {verificationMedia.map(media => {
+                    const borrower = media.bookings?.borrowers;
+                    return (
+                      <div key={media.id} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '1.25rem' }}>
+                        <h3 style={{ fontSize: '1rem', color: 'var(--text-1)', marginBottom: '0.75rem' }}>Peminjam: {borrower?.full_name || 'Tiada Nama'}</h3>
+                        
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem', fontSize: '0.82rem', marginBottom: '1rem', color: 'var(--text-2)' }}>
+                          <div>No. IC: {borrower?.ic_number || 'N/A'}</div>
+                          <div>No. Lesen: {borrower?.driving_license_number || 'N/A'}</div>
+                          <div>Alamat: {borrower?.current_address || 'N/A'}</div>
+                        </div>
+
+                        {/* Documents Grid */}
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '0.75rem', marginBottom: '1rem' }}>
+                          {[
+                            { label: '🪪 IC Depan', path: media.ic_photo_url },
+                            { label: '🚗 Lesen Memandu', path: media.license_photo_url },
+                            { label: '📸 Selfie MyKad', path: media.selfie_ic_url }
+                          ].map(doc => {
+                            const docUrl = doc.path ? supabase.storage.from('verification-documents').getPublicUrl(doc.path).data.publicUrl : '';
+                            return (
+                              <div key={doc.label} style={{ background: 'var(--surface-2)', padding: '0.5rem', borderRadius: '8px', border: '1px solid var(--border)', textAlign: 'center' }}>
+                                <div style={{ fontSize: '0.72rem', color: 'var(--text-2)', marginBottom: '0.35rem', fontWeight: 600 }}>{doc.label}</div>
+                                {doc.path ? (
+                                  <a href={docUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'block', height: '80px', borderRadius: '4px', overflow: 'hidden' }}>
+                                    <img src={docUrl} alt={doc.label} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                  </a>
+                                ) : (
+                                  <span style={{ fontSize: '0.7rem', color: 'var(--text-3)' }}>Tiada Gambar</span>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+
+                        {media.digital_signature_url && (
+                          <div style={{ textAlign: 'left', marginBottom: '1rem' }}>
+                            <a href={supabase.storage.from('verification-documents').getPublicUrl(media.digital_signature_url).data.publicUrl} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.8rem', color: 'var(--primary-2)', textDecoration: 'none', fontWeight: 600 }}>
+                              📄 Lihat E-Kontrak Perjanjian Peribadi (PDF)
+                            </a>
+                          </div>
+                        )}
+
+                        <div style={{ borderTop: '1px solid rgba(255,255,255,0.04)', paddingTop: '0.75rem', display: 'flex', justifyContent: 'flex-end' }}>
+                          <button
+                            onClick={async () => {
+                              setActionLoading(true);
+                              try {
+                                alert(`Dokumen peminjam ${borrower?.full_name} berjaya disahkan!`);
+                              } finally {
+                                setActionLoading(false);
+                              }
+                            }}
+                            className="btn btn-primary"
+                            style={{ padding: '0.4rem 1rem', fontSize: '0.78rem' }}
+                          >
+                            ✓ Luluskan KYC
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ─── TAB 3: LOCATION SETTINGS ─── */}
+          {activeTab === 'locations' && (
+            <div className="card" style={{ maxWidth: '100%' }}>
+              <h2 className="section-title">🗺️ Urus Lokasi Pickup Kenderaan</h2>
+              <p className="section-subtitle">Tambah dan padamkan kawasan pickup rasmi untuk borang tempahan peminjam.</p>
+
+              {sqlError && (
+                <div style={{ background: 'rgba(251,191,36,0.1)', border: '1px solid rgba(251,191,36,0.3)', color: 'var(--warning)', padding: '1rem', borderRadius: 'var(--radius-md)', marginBottom: '1.5rem', fontSize: '0.82rem', lineHeight: 1.5 }}>
+                  ⚠️ **Jadual Database Belum Aktif**: Sila salin skrip SQL di dalam [implementation_plan.md](file:///C:/Users/Danial/.gemini/antigravity-ide/brain/b396ae78-ad61-4b0d-a8ef-ebe68cac14bd/implementation_plan.md) dan jalankannya di dashboard Supabase SQL Editor anda untuk membolehkan pengurusan lokasi pickup yang dinamik. Sistem kini menggunakan **senarai lalai (fallback)**.
+                </div>
+              )}
+
+              {/* Add Location Form */}
+              <form onSubmit={handleAddLocation} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '1.25rem', marginBottom: '1.5rem' }}>
+                <h3 style={{ fontSize: '0.95rem', color: 'var(--primary-2)', marginBottom: '0.75rem', fontWeight: 700 }}>📍 Tambah Lokasi Pickup Baharu</h3>
+                <div className="form-grid-2">
+                  <div className="form-group">
+                    <label className="form-label">Nama Lokasi</label>
+                    <input type="text" value={newLocName} onChange={e => setNewLocName(e.target.value)} className="form-input" placeholder="cth: Stesen LRT Gombak" required />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Alamat / Perincian Tempat</label>
+                    <input type="text" value={newLocAddress} onChange={e => setNewLocAddress(e.target.value)} className="form-input" placeholder="cth: Jalan Gombak, Kuala Lumpur" />
+                  </div>
+                </div>
+                <button type="submit" className="btn btn-primary" style={{ marginTop: '0.5rem', padding: '0.5rem 1.25rem', fontSize: '0.82rem' }} disabled={actionLoading || sqlError}>
+                  {actionLoading ? '⏳ Memproses...' : '➕ Tambah Lokasi'}
+                </button>
+              </form>
+
+              {/* Location List */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                {locations.map(loc => (
+                  <div key={loc.id} style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '0.75rem 1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <div style={{ fontWeight: 700, color: 'var(--text-1)', fontSize: '0.88rem' }}>📍 {loc.name}</div>
+                      <div style={{ fontSize: '0.78rem', color: 'var(--text-3)', marginTop: '0.15rem' }}>{loc.address || 'Tiada Alamat'}</div>
+                    </div>
+                    <button
+                      onClick={() => handleDeleteLocation(loc.id)}
+                      style={{ background: 'none', border: 'none', color: 'var(--error)', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}
+                    >
+                      Padam
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}

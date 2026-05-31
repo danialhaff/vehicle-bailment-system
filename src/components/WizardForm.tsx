@@ -28,7 +28,10 @@ export default function WizardForm({ session }: { session: Session | null }) {
     emergencyContactPhone: '',
     startDateTime: '',
     endDateTime: '',
+    pickupLocationName: '',
   });
+
+  const [pickupLocations, setPickupLocations] = useState<any[]>([]);
 
   // Files State (KYC)
   const [files, setFiles] = useState<{
@@ -84,6 +87,41 @@ export default function WizardForm({ session }: { session: Session | null }) {
   useEffect(() => {
     if (paymentStatus === 'failed') alert('Pembayaran gagal. Sila cuba semula.');
   }, [paymentStatus]);
+
+  useEffect(() => {
+    fetchPickupLocations();
+  }, []);
+
+  const fetchPickupLocations = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('pickup_locations')
+        .select('*')
+        .eq('is_active', true)
+        .order('name', { ascending: true });
+
+      if (error || !data || data.length === 0) {
+        const fallbacks = [
+          { id: '1', name: 'Terminal KL Sentral' },
+          { id: '2', name: 'Stesen LRT Gombak' },
+          { id: '3', name: 'Shah Alam Seksyen 7' }
+        ];
+        setPickupLocations(fallbacks);
+        setFormData(prev => ({ ...prev, pickupLocationName: prev.pickupLocationName || fallbacks[0].name }));
+      } else {
+        setPickupLocations(data);
+        setFormData(prev => ({ ...prev, pickupLocationName: prev.pickupLocationName || data[0].name }));
+      }
+    } catch (err) {
+      const fallbacks = [
+        { id: '1', name: 'Terminal KL Sentral' },
+        { id: '2', name: 'Stesen LRT Gombak' },
+        { id: '3', name: 'Shah Alam Seksyen 7' }
+      ];
+      setPickupLocations(fallbacks);
+      setFormData(prev => ({ ...prev, pickupLocationName: prev.pickupLocationName || fallbacks[0].name }));
+    }
+  };
 
   // Fetch active booking of the logged in user
   const fetchActiveBooking = async (user: any) => {
@@ -323,7 +361,8 @@ export default function WizardForm({ session }: { session: Session | null }) {
             start_datetime: formData.startDateTime,
             end_datetime: formData.endDateTime,
             maintenance_share_amount: calculatePrice(),
-            payment_status: 'Pending'
+            payment_status: 'Pending',
+            pickup_location_name: formData.pickupLocationName || 'Terminal KL Sentral'
           }).select().single();
           if (bookErr) throw bookErr;
 
@@ -392,7 +431,8 @@ export default function WizardForm({ session }: { session: Session | null }) {
       const { data: booking, error: bookErr } = await supabase.from('bookings').insert({
         borrower_id: borrower.id, vehicle_model: 'Proton Persona',
         start_datetime: formData.startDateTime, end_datetime: formData.endDateTime,
-        maintenance_share_amount: calculatePrice(), payment_status: 'Pending'
+        maintenance_share_amount: calculatePrice(), payment_status: 'Pending',
+        pickup_location_name: formData.pickupLocationName || 'Terminal KL Sentral'
       }).select().single();
       if (bookErr) throw bookErr;
 
@@ -506,6 +546,24 @@ export default function WizardForm({ session }: { session: Session | null }) {
               <label className="form-label">Tarikh & Masa Tamat</label>
               <input type="datetime-local" name="endDateTime" value={formData.endDateTime} onChange={handleInput} className="form-input" required />
             </div>
+          </div>
+
+          <div className="form-group" style={{ marginTop: '1rem' }}>
+            <label className="form-label">📍 Pilih Lokasi Pickup Kenderaan</label>
+            <select 
+              name="pickupLocationName" 
+              value={formData.pickupLocationName} 
+              onChange={handleInput as any} 
+              className="form-input" 
+              required
+              style={{ background: 'rgba(6,11,20,0.6)', color: 'var(--text-1)' }}
+            >
+              {pickupLocations.map(loc => (
+                <option key={loc.id} value={loc.name} style={{ background: 'var(--bg-card)', color: 'var(--text-1)' }}>
+                  📍 {loc.name} {loc.address ? ` - ${loc.address}` : ''}
+                </option>
+              ))}
+            </select>
           </div>
 
           {(formData.startDateTime && formData.endDateTime) && (
