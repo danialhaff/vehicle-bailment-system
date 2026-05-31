@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, Suspense } from 'react';
 import WizardForm from '../components/WizardForm';
-import Auth from '../components/Auth';
 import { supabase } from '../lib/supabaseClient';
 import { Session } from '@supabase/supabase-js';
 
@@ -61,27 +60,21 @@ export default function Home() {
           Sistem Disahkan & Selamat
         </div>
         <h1 className="hero-title">
-          {session ? 'Tempahan Kenderaan' : 'Kongsi Kereta,\nBukan Risiko'}
+          Tempahan Kenderaan
         </h1>
         <p className="hero-subtitle">
-          {session
-            ? `Selamat datang kembali! Lengkapkan borang di bawah untuk meminjam kenderaan.`
-            : 'Platform pengesahan pinjaman kenderaan yang selamat dengan e-tandatangan digital dan bayaran FPX.'}
+          Platform pengesahan pinjaman kenderaan yang selamat dengan e-tandatangan digital dan bayaran FPX.
         </p>
       </div>
 
       {/* Main Content */}
-      {!session ? (
-        <Auth />
-      ) : (
-        <Suspense fallback={<div style={{ color: 'var(--text-3)', fontSize: '0.85rem' }}>Memuatkan borang...</div>}>
-          <WizardForm />
-        </Suspense>
-      )}
+      <Suspense fallback={<div style={{ color: 'var(--text-3)', fontSize: '0.85rem' }}>Memuatkan borang...</div>}>
+        <WizardForm session={session} />
+      </Suspense>
 
       {/* Footer */}
       <div style={{ marginTop: '2rem', textAlign: 'center', fontSize: '0.75rem', color: 'var(--text-3)', zIndex: 10 }}>
-        <p>© 2025 VehicleShare · Selamat · Selamat · Dipercayai</p>
+        <p>© 2025 VehicleShare · Selamat · Dipercayai</p>
       </div>
 
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
