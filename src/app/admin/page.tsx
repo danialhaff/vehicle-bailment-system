@@ -51,8 +51,10 @@ export default function AdminDashboard() {
     if (!session) return false;
     const userEmail = session.user?.email || '';
     const metadataRole = session.user?.user_metadata?.role;
-    // danialhaffiz9@gmail.com is Admin by default, or anyone with role 'admin'
-    return userEmail === 'danialhaffiz9@gmail.com' || metadataRole === 'admin';
+    // Authorized admin accounts
+    return userEmail === 'danialhaffiz9@gmail.com' || 
+           userEmail === 'danialhaff.official@gmail.com' || 
+           metadataRole === 'admin';
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -64,7 +66,7 @@ export default function AdminDashboard() {
       
       const userEmail = data.user?.email || '';
       const metadataRole = data.user?.user_metadata?.role;
-      if (userEmail !== 'danialhaffiz9@gmail.com' && metadataRole !== 'admin') {
+      if (userEmail !== 'danialhaffiz9@gmail.com' && userEmail !== 'danialhaff.official@gmail.com' && metadataRole !== 'admin') {
         alert('Akses Ditolak. Akaun anda bukan Pentadbir (Admin).');
         await supabase.auth.signOut();
       }
