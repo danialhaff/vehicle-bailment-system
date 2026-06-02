@@ -959,40 +959,10 @@ export default function WizardForm({ session }: { session: Session | null }) {
                 </div>
               </div>
 
-              {/* Inline Auth Block if not logged in */}
-              {!session && (
-                <div style={{ background: 'rgba(59,125,216,0.06)', border: '1px dashed rgba(59,125,216,0.3)', borderRadius: 'var(--radius-md)', padding: '1.25rem', marginTop: '1.5rem', marginBottom: '1rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                    <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--primary-2)' }}>
-                      {isRegister ? '🔑 Cipta Akaun Baharu untuk Tempah' : '🔑 Log Masuk Akaun Sedia Ada'}
-                    </h3>
-                    <button type="button" onClick={() => setIsRegister(!isRegister)} style={{ background: 'none', border: 'none', color: 'var(--purple)', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}>
-                      {isRegister ? 'Log Masuk di sini' : 'Daftar Akaun Baru'}
-                    </button>
-                  </div>
-
-                  <div className="form-grid-2">
-                    <div className="form-group">
-                      <label className="form-label">Alamat E-mel</label>
-                      <input type="email" value={authEmail} onChange={e => setAuthEmail(e.target.value)} className="form-input" placeholder="contoh@email.com" required />
-                    </div>
-                    <div className="form-group">
-                      <label className="form-label">Kata Laluan</label>
-                      <input type="password" value={authPassword} onChange={e => setAuthPassword(e.target.value)} className="form-input" placeholder="••••••••" required minLength={6} />
-                    </div>
-                  </div>
-
-                  <label className="agreement-row" style={{ padding: '0.5rem', background: 'none', border: 'none', margin: '0.5rem 0 0 0', cursor: 'pointer' }}>
-                    <input type="checkbox" checked={agreeToRegister} onChange={e => setAgreeToRegister(e.target.checked)} className="agreement-check" style={{ width: '16px', height: '16px' }} />
-                    <span className="agreement-text" style={{ fontSize: '0.78rem' }}>Saya setuju untuk register account/login bagi menyelesaikan tempahan ini.</span>
-                  </label>
-                </div>
-              )}
-
               <div className="form-nav">
                 <div />
-                <button className="btn btn-primary" type="submit" disabled={authLoading || loading}>
-                  {authLoading ? '⏳ Memproses...' : session?.user?.user_metadata?.is_verified ? '⚡ Tempah & Bayar Secara Terus' : 'Seterusnya →'}
+                <button className="btn btn-primary" type="submit" disabled={loading}>
+                  {loading ? '⏳ Memproses...' : session?.user?.user_metadata?.is_verified ? '⚡ Tempah & Bayar Secara Terus' : 'Seterusnya →'}
                 </button>
               </div>
             </form>

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, Suspense } from 'react';
 import WizardForm from '../components/WizardForm';
+import Auth from '../components/Auth';
 import { supabase } from '../lib/supabaseClient';
 import { Session } from '@supabase/supabase-js';
 
@@ -60,17 +61,23 @@ export default function Home() {
           Sistem Disahkan & Selamat
         </div>
         <h1 className="hero-title">
-          Tempahan Kenderaan
+          {session ? 'Tempahan Kenderaan' : 'Kongsi Kereta,\nBukan Risiko'}
         </h1>
         <p className="hero-subtitle">
-          Platform pengesahan pinjaman kenderaan yang selamat dengan e-tandatangan digital dan bayaran FPX.
+          {session 
+            ? 'Uruskan tempahan aktif, penyerahan foto takat minyak & keadaan fizikal serta sejarah perjalanan anda.'
+            : 'Platform pengesahan pinjaman kenderaan persendirian dengan e-tandatangan dan log masuk Google.'}
         </p>
       </div>
 
-      {/* Main Content */}
-      <Suspense fallback={<div style={{ color: 'var(--text-3)', fontSize: '0.85rem' }}>Memuatkan borang...</div>}>
-        <WizardForm session={session} />
-      </Suspense>
+      {/* Main Content: Conditionally show Auth Wall or WizardForm */}
+      {!session ? (
+        <Auth />
+      ) : (
+        <Suspense fallback={<div style={{ color: 'var(--text-3)', fontSize: '0.85rem' }}>Memuatkan borang...</div>}>
+          <WizardForm session={session} />
+        </Suspense>
+      )}
 
       {/* Footer */}
       <div style={{ marginTop: '2rem', textAlign: 'center', fontSize: '0.75rem', color: 'var(--text-3)', zIndex: 10 }}>

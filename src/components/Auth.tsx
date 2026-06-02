@@ -19,12 +19,26 @@ export default function Auth() {
       } else {
         const { error } = await supabase.auth.signUp({ email, password });
         if (error) throw error;
-        alert('Pendaftaran berjaya! Anda kini log masuk.');
+        alert('Pendaftaran berjaya! Sila semak peti masuk e-mel anda sekiranya pengesahan diwajibkan.');
       }
     } catch (error: any) {
       alert(error.error_description || error.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin
+        }
+      });
+      if (error) throw error;
+    } catch (error: any) {
+      alert(error.message);
     }
   };
 
@@ -86,6 +100,40 @@ export default function Auth() {
         </button>
       </form>
 
+      {/* Divider for Social Login */}
+      <div style={{ display: 'flex', alignItems: 'center', margin: '1.25rem 0', gap: '0.5rem' }}>
+        <div style={{ flex: 1, height: '1px', background: 'var(--border)' }} />
+        <span style={{ fontSize: '0.75rem', color: 'var(--text-3)', fontWeight: 600 }}>ATAU</span>
+        <div style={{ flex: 1, height: '1px', background: 'var(--border)' }} />
+      </div>
+
+      {/* Google Login Button */}
+      <button 
+        type="button" 
+        onClick={handleGoogleLogin} 
+        className="btn btn-secondary w-full" 
+        style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          gap: '0.6rem',
+          padding: '0.75rem',
+          fontSize: '0.88rem',
+          fontWeight: 700,
+          background: 'rgba(255, 255, 255, 0.03)',
+          border: '1px solid var(--border)',
+          transition: 'all 0.2s',
+          borderRadius: 'var(--radius-md)',
+          cursor: 'pointer'
+        }}
+      >
+        {/* Google colorful SVG Logo */}
+        <svg width="18" height="18" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
+          <path fill="#EA4335" d="M12.24 10.285V14.4h6.887c-.648 2.41-2.519 4.113-5.136 4.113-3.44 0-6.233-2.793-6.233-6.233s2.793-6.233 6.233-6.233c1.555 0 2.964.576 4.05 1.516l3.11-3.11C18.98 2.38 15.78 1.1 12.24 1.1 6.13 1.1 1.1 6.13 1.1 12.24s5.03 11.14 11.14 11.14c6.326 0 11.14-4.444 11.14-11.14 0-.752-.08-1.32-.196-1.955H12.24z"/>
+        </svg>
+        <span>Teruskan dengan Google</span>
+      </button>
+
       {/* Trust badges */}
       <div className="trust-row" style={{ marginTop: '1.25rem' }}>
         <div className="trust-item">
@@ -98,7 +146,7 @@ export default function Auth() {
         </div>
         <div className="trust-item">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5.52 19c.64-2.2 1.84-3 3.22-3h6.52c1.38 0 2.58.8 3.22 3"/><circle cx="12" cy="10" r="3"/><circle cx="12" cy="12" r="10"/></svg>
-          Tanpa Yuran Pendaftaran
+          Sokong Google SSO
         </div>
       </div>
 
