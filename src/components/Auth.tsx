@@ -44,6 +44,13 @@ export default function Auth() {
 
   return (
     <div className="card" style={{ maxWidth: 420 }}>
+      {/* Brand Header */}
+      <div className="auth-brand-header">
+        <span className="auth-brand-icon">🚗</span>
+        <div className="auth-brand-name">VehicleShare</div>
+        <div className="auth-brand-sub">Platform Sewa Kenderaan Selamat</div>
+      </div>
+
       {/* Tabs */}
       <div className="auth-tabs">
         <button className={`auth-tab ${isLogin ? 'active' : ''}`} onClick={() => setIsLogin(true)}>
@@ -100,35 +107,17 @@ export default function Auth() {
         </button>
       </form>
 
-      {/* Divider for Social Login */}
-      <div style={{ display: 'flex', alignItems: 'center', margin: '1.25rem 0', gap: '0.5rem' }}>
-        <div style={{ flex: 1, height: '1px', background: 'var(--border)' }} />
-        <span style={{ fontSize: '0.75rem', color: 'var(--text-3)', fontWeight: 600 }}>ATAU</span>
-        <div style={{ flex: 1, height: '1px', background: 'var(--border)' }} />
-      </div>
+      {/* Divider */}
+      <div className="auth-or-divider">ATAU</div>
 
       {/* Google Login Button */}
-      <button 
-        type="button" 
-        onClick={handleGoogleLogin} 
-        className="btn btn-secondary w-full" 
-        style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center', 
-          gap: '0.6rem',
-          padding: '0.75rem',
-          fontSize: '0.88rem',
-          fontWeight: 700,
-          background: 'rgba(255, 255, 255, 0.03)',
-          border: '1px solid var(--border)',
-          transition: 'all 0.2s',
-          borderRadius: 'var(--radius-md)',
-          cursor: 'pointer'
-        }}
+      <button
+        type="button"
+        onClick={handleGoogleLogin}
+        className="google-btn"
       >
         {/* Google colorful SVG Logo */}
-        <svg width="18" height="18" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
+        <svg width="20" height="20" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
           <path fill="#EA4335" d="M12.24 10.285V14.4h6.887c-.648 2.41-2.519 4.113-5.136 4.113-3.44 0-6.233-2.793-6.233-6.233s2.793-6.233 6.233-6.233c1.555 0 2.964.576 4.05 1.516l3.11-3.11C18.98 2.38 15.78 1.1 12.24 1.1 6.13 1.1 1.1 6.13 1.1 12.24s5.03 11.14 11.14 11.14c6.326 0 11.14-4.444 11.14-11.14 0-.752-.08-1.32-.196-1.955H12.24z"/>
         </svg>
         <span>Teruskan dengan Google</span>

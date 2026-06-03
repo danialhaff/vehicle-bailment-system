@@ -1,38 +1,41 @@
 /* =============================================
-   VEHICLESHARE — Premium Design System
+   VEHICLESHARE — Premium Design System v2
    ============================================= */
 
 :root {
   --font: 'Plus Jakarta Sans', sans-serif;
 
-  /* Colors */
-  --bg:          #060b14;
-  --bg-card:     #0d1523;
-  --surface:     #111d2e;
-  --surface-2:   #162030;
-  --border:      rgba(255,255,255,0.08);
-  --border-focus: rgba(99,179,237,0.6);
+  /* Colors — richer palette */
+  --bg:          #04080f;
+  --bg-card:     #0a1628;
+  --surface:     #0f1f35;
+  --surface-2:   #142540;
+  --border:      rgba(255,255,255,0.09);
+  --border-focus: rgba(56,189,248,0.7);
 
-  --primary:     #3b7dd8;
-  --primary-2:   #5b9ef0;
-  --primary-glow: rgba(59,125,216,0.35);
-  --purple:      #8b5cf6;
-  --purple-glow: rgba(139,92,246,0.3);
+  /* New cyan-blue primary */
+  --primary:     #0ea5e9;
+  --primary-2:   #38bdf8;
+  --primary-glow: rgba(14,165,233,0.4);
+  --purple:      #a78bfa;
+  --purple-glow: rgba(167,139,250,0.35);
+  --cyan:        #22d3ee;
+  --cyan-glow:   rgba(34,211,238,0.3);
 
-  --text-1:      #f0f6ff;
-  --text-2:      #8da8c8;
-  --text-3:      #4d6a8a;
+  --text-1:      #f1f8ff;
+  --text-2:      #94b8d4;
+  --text-3:      #4a6a8a;
 
   --success:     #10b981;
-  --success-bg:  rgba(16,185,129,0.1);
+  --success-bg:  rgba(16,185,129,0.12);
   --error:       #f87171;
   --warning:     #fbbf24;
 
   /* Spacing */
   --radius-sm:   8px;
-  --radius-md:   12px;
-  --radius-lg:   18px;
-  --radius-xl:   24px;
+  --radius-md:   14px;
+  --radius-lg:   20px;
+  --radius-xl:   28px;
 }
 
 *, *::before, *::after {
@@ -80,17 +83,24 @@ p  { color: var(--text-2); line-height: 1.7; font-size: 0.95rem; }
   overflow-x: hidden;
 }
 
-/* Animated mesh gradient background */
+/* Vivid animated mesh gradient background */
 .page::before {
   content: '';
   position: fixed;
   inset: 0;
   background:
-    radial-gradient(ellipse 80% 60% at 20% 10%, rgba(59,125,216,0.18) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 50% at 80% 85%, rgba(139,92,246,0.14) 0%, transparent 55%),
-    radial-gradient(ellipse 50% 40% at 60% 40%, rgba(16,185,129,0.07) 0%, transparent 50%);
+    radial-gradient(ellipse 70% 55% at 15% 5%,  rgba(14,165,233,0.45)  0%, transparent 55%),
+    radial-gradient(ellipse 55% 50% at 85% 90%, rgba(167,139,250,0.38) 0%, transparent 50%),
+    radial-gradient(ellipse 45% 40% at 55% 50%, rgba(34,211,238,0.18)  0%, transparent 45%),
+    radial-gradient(ellipse 60% 35% at 90% 10%, rgba(167,139,250,0.22) 0%, transparent 40%);
   pointer-events: none;
   z-index: 0;
+  animation: bgPulse 8s ease-in-out infinite alternate;
+}
+
+@keyframes bgPulse {
+  from { opacity: 0.85; }
+  to   { opacity: 1; }
 }
 
 /* =============================================
@@ -1436,4 +1446,275 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator {
 @media (max-width: 480px) {
   .dash-welcome { flex-direction: column; }
   .dash-welcome .btn { width: 100%; justify-content: center; }
+}
+
+/* =============================================
+   NEW VISUAL ELEMENTS v2
+   ============================================= */
+
+/* ── Hero Car Visual ── */
+.car-visual-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0.5rem auto 1.5rem;
+  width: 100px;
+  height: 100px;
+}
+
+.car-visual-glow {
+  position: absolute;
+  inset: -12px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(14,165,233,0.4) 0%, rgba(167,139,250,0.2) 50%, transparent 70%);
+  animation: glowPulse 3s ease-in-out infinite;
+  filter: blur(8px);
+}
+
+.car-visual-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(14,165,233,0.35);
+  animation: ringExpand 3s ease-in-out infinite;
+}
+
+.car-visual-ring-2 {
+  position: absolute;
+  inset: -16px;
+  border-radius: 50%;
+  border: 1px solid rgba(167,139,250,0.2);
+  animation: ringExpand 3s ease-in-out infinite 0.8s;
+}
+
+.car-emoji {
+  font-size: 3.5rem;
+  position: relative;
+  z-index: 1;
+  animation: carFloat 4s ease-in-out infinite;
+  filter: drop-shadow(0 0 20px rgba(14,165,233,0.6));
+}
+
+@keyframes glowPulse {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50%       { opacity: 1;   transform: scale(1.1); }
+}
+
+@keyframes ringExpand {
+  0%   { transform: scale(0.9); opacity: 0.8; }
+  50%  { transform: scale(1.08); opacity: 0.4; }
+  100% { transform: scale(0.9); opacity: 0.8; }
+}
+
+@keyframes carFloat {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-8px); }
+}
+
+/* ── Feature Strip ── */
+.feature-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.6rem;
+  width: 100%;
+  max-width: 600px;
+  margin-bottom: 1.5rem;
+  z-index: 10;
+}
+
+.feature-chip {
+  background: rgba(14,165,233,0.07);
+  border: 1px solid rgba(14,165,233,0.18);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 0.5rem;
+  text-align: center;
+  transition: all 0.25s;
+  cursor: default;
+}
+
+.feature-chip:hover {
+  background: rgba(14,165,233,0.14);
+  border-color: rgba(14,165,233,0.35);
+  transform: translateY(-2px);
+}
+
+.feature-chip-icon {
+  font-size: 1.4rem;
+  margin-bottom: 0.35rem;
+}
+
+.feature-chip-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--primary-2);
+  letter-spacing: 0.01em;
+  line-height: 1.3;
+}
+
+@media (max-width: 400px) {
+  .feature-strip { grid-template-columns: 1fr 1fr 1fr; gap: 0.4rem; }
+  .feature-chip { padding: 0.6rem 0.3rem; }
+  .feature-chip-icon { font-size: 1.1rem; }
+  .feature-chip-label { font-size: 0.62rem; }
+}
+
+/* ── Auth Brand Header ── */
+.auth-brand-header {
+  margin: -2rem -2rem 1.5rem;
+  padding: 1.25rem 2rem;
+  background: linear-gradient(135deg, rgba(14,165,233,0.18) 0%, rgba(167,139,250,0.12) 100%);
+  border-bottom: 1px solid rgba(14,165,233,0.2);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-brand-header::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(14,165,233,0.08) 50%, transparent 100%);
+  animation: shimmer 3s linear infinite;
+}
+
+@keyframes shimmer {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(100%); }
+}
+
+.auth-brand-icon {
+  font-size: 2rem;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.auth-brand-name {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--text-1);
+  letter-spacing: -0.02em;
+}
+
+.auth-brand-sub {
+  font-size: 0.72rem;
+  color: var(--primary-2);
+  font-weight: 600;
+  margin-top: 0.1rem;
+}
+
+/* ── Upgraded Card ── */
+.card {
+  box-shadow:
+    0 0 0 1px rgba(14,165,233,0.08),
+    0 0 60px rgba(14,165,233,0.08),
+    0 32px 80px rgba(0,0,0,0.5),
+    0 8px 24px rgba(0,0,0,0.3) !important;
+}
+
+/* ── Upgraded Buttons ── */
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary) 0%, #0284c7 50%, #7c3aed 100%) !important;
+  box-shadow: 0 4px 20px rgba(14,165,233,0.4) !important;
+}
+
+.btn-primary:hover:not(:disabled) {
+  box-shadow: 0 8px 32px rgba(14,165,233,0.6) !important;
+  filter: brightness(1.1) !important;
+}
+
+.btn-pay {
+  background: linear-gradient(135deg, var(--success), #0d9488, #059669) !important;
+  box-shadow: 0 4px 20px rgba(16,185,129,0.4) !important;
+}
+
+/* ── Hero title upgraded ── */
+.hero-title {
+  background: linear-gradient(135deg, #f1f8ff 0%, #38bdf8 45%, #a78bfa 80%, #f1f8ff 100%) !important;
+  background-size: 200% auto !important;
+  animation: titleShine 4s linear infinite !important;
+}
+
+@keyframes titleShine {
+  from { background-position: 0% center; }
+  to   { background-position: 200% center; }
+}
+
+/* ── Hero badge upgraded ── */
+.hero-badge {
+  background: rgba(14,165,233,0.15) !important;
+  border-color: rgba(14,165,233,0.4) !important;
+  color: var(--primary-2) !important;
+  box-shadow: 0 0 20px rgba(14,165,233,0.2);
+}
+
+/* ── Topbar logo icon gradient ── */
+.topbar-logo-icon {
+  background: linear-gradient(135deg, var(--primary), var(--purple)) !important;
+  box-shadow: 0 4px 16px rgba(14,165,233,0.4);
+}
+
+/* ── Active step indicator ── */
+.step-item.active .step-circle {
+  background: linear-gradient(135deg, var(--primary), var(--purple)) !important;
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 4px rgba(14,165,233,0.3), 0 0 20px rgba(14,165,233,0.4) !important;
+}
+
+/* ── Auth tabs upgraded ── */
+.auth-tab.active {
+  background: linear-gradient(135deg, var(--primary), #0284c7) !important;
+  box-shadow: 0 2px 12px rgba(14,165,233,0.5) !important;
+}
+
+/* ── Card top accent line upgraded ── */
+.card::before {
+  background: linear-gradient(90deg, transparent, rgba(14,165,233,0.5), rgba(167,139,250,0.4), transparent) !important;
+}
+
+/* ── Google button upgrade ── */
+.google-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.82rem;
+  min-height: 48px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: var(--radius-md);
+  color: var(--text-1);
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.google-btn:hover {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.22);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+}
+
+/* ── Auth divider ── */
+.auth-or-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1.25rem 0;
+  color: var(--text-3);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+.auth-or-divider::before,
+.auth-or-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border), transparent);
 }

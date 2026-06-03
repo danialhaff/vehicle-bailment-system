@@ -41,34 +41,76 @@ export default function Home() {
           <div className="topbar-logo-icon">🚗</div>
           VehicleShare
         </div>
-
-        {session && (
-          <button className="btn-logout" onClick={() => supabase.auth.signOut()}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-              <polyline points="16 17 21 12 16 7"/>
-              <line x1="21" y1="12" x2="9" y2="12"/>
-            </svg>
-            Log Keluar
-          </button>
-        )}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          {!session && (
+            <a href="/admin" style={{ fontSize: '0.75rem', color: 'var(--text-3)', textDecoration: 'none', fontWeight: 600, padding: '0.35rem 0.65rem', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '6px' }}>
+              Admin ⚙️
+            </a>
+          )}
+          {session && (
+            <button className="btn-logout" onClick={() => supabase.auth.signOut()}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                <polyline points="16 17 21 12 16 7"/>
+                <line x1="21" y1="12" x2="9" y2="12"/>
+              </svg>
+              Log Keluar
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Hero Header */}
-      <div className="hero">
-        <div className="hero-badge">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="8"/></svg>
-          Sistem Disahkan & Selamat
+      {!session && (
+        <>
+          {/* Animated Car Visual */}
+          <div className="car-visual-wrap">
+            <div className="car-visual-glow" />
+            <div className="car-visual-ring" />
+            <div className="car-visual-ring-2" />
+            <span className="car-emoji">🚗</span>
+          </div>
+
+          <div className="hero">
+            <div className="hero-badge">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="8"/></svg>
+              Sistem Disahkan &amp; Selamat
+            </div>
+            <h1 className="hero-title">Kongsi Kereta,{'\n'}Bukan Risiko</h1>
+            <p className="hero-subtitle">
+              Platform pengesahan pinjaman kenderaan persendirian dengan e-tandatangan dan log masuk Google.
+            </p>
+          </div>
+
+          {/* Feature Strip */}
+          <div className="feature-strip">
+            {[
+              { icon: '📋', label: 'Kontrak Digital' },
+              { icon: '🛡️', label: 'Pengesahan KYC' },
+              { icon: '💳', label: 'Bayar FPX' },
+            ].map(f => (
+              <div key={f.label} className="feature-chip">
+                <div className="feature-chip-icon">{f.icon}</div>
+                <div className="feature-chip-label">{f.label}</div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* Hero for logged in users */}
+      {session && (
+        <div className="hero" style={{ marginBottom: '0.5rem' }}>
+          <div className="hero-badge">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="8"/></svg>
+            Sistem Disahkan &amp; Selamat
+          </div>
+          <h1 className="hero-title">Tempahan Kenderaan</h1>
+          <p className="hero-subtitle">
+            Uruskan tempahan aktif, penyerahan foto takat minyak &amp; keadaan fizikal serta sejarah perjalanan anda.
+          </p>
         </div>
-        <h1 className="hero-title">
-          {session ? 'Tempahan Kenderaan' : 'Kongsi Kereta,\nBukan Risiko'}
-        </h1>
-        <p className="hero-subtitle">
-          {session 
-            ? 'Uruskan tempahan aktif, penyerahan foto takat minyak & keadaan fizikal serta sejarah perjalanan anda.'
-            : 'Platform pengesahan pinjaman kenderaan persendirian dengan e-tandatangan dan log masuk Google.'}
-        </p>
-      </div>
+      )}
 
       {/* Main Content: Conditionally show Auth Wall or WizardForm */}
       {!session ? (
