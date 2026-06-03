@@ -37,9 +37,6 @@ export default function Home() {
     <div className="page">
       {/* Top Navigation Bar */}
       <div className="topbar">
-        <div className="topbar-logo">
-          <img src="/logo.png" alt="KongsiRide" style={{ height: '48px', width: 'auto', objectFit: 'contain', mixBlendMode: 'screen' }} />
-        </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           {session && (
             <button className="btn-logout" onClick={() => supabase.auth.signOut()}>
