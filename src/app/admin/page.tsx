@@ -11,6 +11,8 @@ export default function AdminDashboard() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [activeTab, setActiveTab] = useState<'bookings' | 'kyc' | 'locations'>('bookings');
+  const [statusFilter, setStatusFilter] = useState<'All' | 'Paid' | 'Pending' | 'Cancelled'>('All');
+  const [approvedKycIds, setApprovedKycIds] = useState<string[]>([]);
 
   // Database Data State
   const [bookings, setBookings] = useState<any[]>([]);
@@ -78,6 +80,23 @@ export default function AdminDashboard() {
       }
     } catch (err: any) {
       alert(`Ralat log masuk: ${err.message}`);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setActionLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/admin`
+        }
+      });
+      if (error) throw error;
+    } catch (err: any) {
+      alert(`Ralat log masuk Google: ${err.message}`);
     } finally {
       setActionLoading(false);
     }
@@ -227,6 +246,12 @@ export default function AdminDashboard() {
       {/* Admin Auth Shield */}
       {!session || !isAdmin() ? (
         <div className="card" style={{ maxWidth: 400, marginTop: '2rem' }}>
+          {session && !isAdmin() && (
+            <div style={{ background: 'rgba(248,113,113,0.1)', color: 'var(--error)', padding: '0.75rem', borderRadius: '8px', marginBottom: '1rem', fontSize: '0.82rem', textAlign: 'center', fontWeight: 600 }}>
+              ⚠️ Akses Ditolak: Akaun ({session.user?.email}) bukan Pentadbir (Admin). Sila log keluar dan log masuk semula dengan e-mel admin yang betul.
+            </div>
+          )}
+
           <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
             <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>🛡️</div>
             <h2 className="section-title">Log Masuk Pentadbir</h2>
@@ -247,6 +272,37 @@ export default function AdminDashboard() {
               {actionLoading ? '⏳ Mengesahkan...' : 'Masuk Panel Kawalan 🛡️'}
             </button>
           </form>
+
+          <div style={{ margin: '1.25rem 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', color: 'var(--text-3)', fontSize: '0.8rem' }}>
+            <span style={{ height: '1px', background: 'var(--border)', flex: 1 }} />
+            <span>ATAU</span>
+            <span style={{ height: '1px', background: 'var(--border)', flex: 1 }} />
+          </div>
+
+          <button 
+            type="button"
+            className="btn btn-secondary w-full" 
+            onClick={handleGoogleLogin} 
+            disabled={actionLoading}
+            style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              gap: '0.6rem',
+              fontWeight: 600,
+              border: '1px solid var(--border)',
+              background: 'rgba(255,255,255,0.02)',
+              color: 'var(--text-1)'
+            }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
+              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/>
+            </svg>
+            Teruskan dengan Google (Admin)
+          </button>
         </div>
       ) : (
         /* Admin Main Workspace */
@@ -287,11 +343,43 @@ export default function AdminDashboard() {
               <h2 className="section-title">📅 Urusan Tempahan Kenderaan</h2>
               <p className="section-subtitle">Tinjau status bayaran, kontrak PDF bertandatangan, dan gambar sebelum/selepas perjalanan.</p>
 
-              {bookings.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '3rem 0', color: 'var(--text-3)' }}>Tiada rekod tempahan di dalam sistem.</div>
+              {/* Status Filter buttons */}
+              <div style={{ display: 'flex', gap: '0.4rem', marginBottom: '1.5rem', flexWrap: 'wrap', borderBottom: '1px solid rgba(255,255,255,0.04)', paddingBottom: '1rem' }}>
+                {[
+                  { id: 'All', label: 'Semua Tempahan' },
+                  { id: 'Pending', label: '⏳ Pending' },
+                  { id: 'Paid', label: '💰 Paid' },
+                  { id: 'Cancelled', label: '✗ Cancelled' }
+                ].map(f => (
+                  <button
+                    key={f.id}
+                    onClick={() => setStatusFilter(f.id as any)}
+                    style={{
+                      padding: '0.4rem 0.85rem',
+                      borderRadius: '6px',
+                      border: '1px solid ' + (statusFilter === f.id ? 'var(--primary)' : 'var(--border)'),
+                      background: statusFilter === f.id ? 'var(--primary)' : 'var(--surface-2)',
+                      color: statusFilter === f.id ? '#fff' : 'var(--text-2)',
+                      fontSize: '0.78rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      transition: 'all 0.15s'
+                    }}
+                  >
+                    {f.label}
+                  </button>
+                ))}
+              </div>
+
+              {bookings.filter(b => statusFilter === 'All' ? true : b.payment_status === statusFilter).length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '3rem 0', color: 'var(--text-3)' }}>
+                  Tiada rekod tempahan padan dengan status "{statusFilter}".
+                </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                  {bookings.map(book => {
+                  {bookings
+                    .filter(b => statusFilter === 'All' ? true : b.payment_status === statusFilter)
+                    .map(book => {
                     const contractLink = book.id ? supabase.storage.from('verification-documents').getPublicUrl(`contracts/`).data.publicUrl : ''; // fallback path logic
                     
                     return (
@@ -386,7 +474,19 @@ export default function AdminDashboard() {
                     const borrower = media.bookings?.borrowers;
                     return (
                       <div key={media.id} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '1.25rem' }}>
-                        <h3 style={{ fontSize: '1rem', color: 'var(--text-1)', marginBottom: '0.75rem' }}>Peminjam: {borrower?.full_name || 'Tiada Nama'}</h3>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                          <h3 style={{ fontSize: '1rem', color: 'var(--text-1)', margin: 0 }}>Peminjam: {borrower?.full_name || 'Tiada Nama'}</h3>
+                          <span style={{
+                            fontSize: '0.72rem',
+                            fontWeight: 700,
+                            padding: '0.2rem 0.5rem',
+                            borderRadius: '99px',
+                            background: approvedKycIds.includes(media.id) ? 'var(--success-bg)' : 'rgba(251,191,36,0.12)',
+                            color: approvedKycIds.includes(media.id) ? 'var(--success)' : 'var(--warning)'
+                          }}>
+                            {approvedKycIds.includes(media.id) ? '🛡️ KYC DISAHKAN' : '⏳ MENUNGGU KELULUSAN'}
+                          </span>
+                        </div>
                         
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem', fontSize: '0.82rem', marginBottom: '1rem', color: 'var(--text-2)' }}>
                           <div>No. IC: {borrower?.ic_number || 'N/A'}</div>
@@ -430,15 +530,23 @@ export default function AdminDashboard() {
                             onClick={async () => {
                               setActionLoading(true);
                               try {
-                                alert(`Dokumen peminjam ${borrower?.full_name} berjaya disahkan!`);
+                                alert(`Dokumen peminjam ${borrower?.full_name || 'Ahli'} berjaya disahkan!`);
+                                setApprovedKycIds(prev => [...prev, media.id]);
                               } finally {
                                 setActionLoading(false);
                               }
                             }}
+                            disabled={approvedKycIds.includes(media.id)}
                             className="btn btn-primary"
-                            style={{ padding: '0.4rem 1rem', fontSize: '0.78rem' }}
+                            style={{ 
+                              padding: '0.4rem 1rem', 
+                              fontSize: '0.78rem',
+                              background: approvedKycIds.includes(media.id) ? 'var(--success-bg)' : 'var(--primary)',
+                              color: approvedKycIds.includes(media.id) ? 'var(--success)' : '#fff',
+                              border: 'none'
+                            }}
                           >
-                            ✓ Luluskan KYC
+                            {approvedKycIds.includes(media.id) ? '✓ Selesai Diluluskan' : '✓ Luluskan KYC'}
                           </button>
                         </div>
                       </div>
