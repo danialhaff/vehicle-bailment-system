@@ -60,45 +60,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Hero Header */}
-      {!session && (
-        <>
-          {/* Animated Car Visual */}
-          <div className="car-visual-wrap">
-            <div className="car-visual-glow" />
-            <div className="car-visual-ring" />
-            <div className="car-visual-ring-2" />
-            <span className="car-emoji">🚗</span>
-          </div>
-
-          <div className="hero">
-            <div className="hero-badge">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="8"/></svg>
-              Sistem Disahkan &amp; Selamat
-            </div>
-            <h1 className="hero-title">Kongsi Kereta,{'\n'}Bukan Risiko</h1>
-            <p className="hero-subtitle">
-              Platform pengesahan pinjaman kenderaan persendirian dengan e-tandatangan dan log masuk Google.
-            </p>
-          </div>
-
-          {/* Feature Strip */}
-          <div className="feature-strip">
-            {[
-              { icon: '📋', label: 'Kontrak Digital' },
-              { icon: '🛡️', label: 'Pengesahan KYC' },
-              { icon: '💳', label: 'Bayar FPX' },
-            ].map(f => (
-              <div key={f.label} className="feature-chip">
-                <div className="feature-chip-icon">{f.icon}</div>
-                <div className="feature-chip-label">{f.label}</div>
-              </div>
-            ))}
-          </div>
-        </>
-      )}
-
-      {/* Hero for logged in users */}
+      {/* Hero for logged in users only */}
       {session && (
         <div className="hero" style={{ marginBottom: '0.5rem' }}>
           <div className="hero-badge">
