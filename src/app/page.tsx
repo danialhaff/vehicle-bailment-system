@@ -51,19 +51,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Hero for logged in users only */}
-      {session && (
-        <div className="hero" style={{ marginBottom: '0.5rem' }}>
-          <div className="hero-badge">
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="8"/></svg>
-            Sistem Disahkan &amp; Selamat
-          </div>
-          <h1 className="hero-title">Tempahan Kenderaan</h1>
-          <p className="hero-subtitle">
-            Uruskan tempahan aktif, penyerahan foto takat minyak &amp; keadaan fizikal serta sejarah perjalanan anda.
-          </p>
-        </div>
-      )}
+
 
       {/* Main Content: Conditionally show Auth Wall or WizardForm */}
       {!session ? (
