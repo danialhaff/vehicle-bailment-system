@@ -38,14 +38,9 @@ export default function Home() {
       {/* Top Navigation Bar */}
       <div className="topbar">
         <div className="topbar-logo">
-          <img src="/logo.png" alt="KongsiRide" style={{ height: '36px', width: 'auto', objectFit: 'contain' }} />
+          <img src="/logo.png" alt="KongsiRide" style={{ height: '48px', width: 'auto', objectFit: 'contain', mixBlendMode: 'screen' }} />
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          {!session && (
-            <a href="/admin" style={{ fontSize: '0.75rem', color: 'var(--text-3)', textDecoration: 'none', fontWeight: 600, padding: '0.35rem 0.65rem', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '6px' }}>
-              Admin ⚙️
-            </a>
-          )}
           {session && (
             <button className="btn-logout" onClick={() => supabase.auth.signOut()}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
