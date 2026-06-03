@@ -382,19 +382,42 @@ export default function WizardForm({ session }: { session: Session | null }) {
         // Skip Step 2 and Step 3 entirely! Go straight to Payment Step 4.
         setLoading(true);
         try {
-          // Pre-insert borrower and booking record to trigger Step 4
-          const { data: borrower, error: bErr } = await supabase.from('borrowers').insert({
-            full_name: formData.fullName,
-            ic_number: formData.icNumber,
-            driving_license_number: formData.drivingLicense,
-            current_address: formData.address,
-            emergency_contact_name: formData.emergencyContactName,
-            emergency_contact_phone: formData.emergencyContactPhone
-          }).select().single();
-          if (bErr) throw bErr;
+          // Check if borrower already exists
+          const { data: existingBorrower } = await supabase
+            .from('borrowers')
+            .select('id')
+            .eq('ic_number', formData.icNumber)
+            .maybeSingle();
+
+          let borrowerId = '';
+          if (existingBorrower) {
+            borrowerId = existingBorrower.id;
+            const { error: uErr } = await supabase
+              .from('borrowers')
+              .update({
+                full_name: formData.fullName,
+                driving_license_number: formData.drivingLicense,
+                current_address: formData.address,
+                emergency_contact_name: formData.emergencyContactName,
+                emergency_contact_phone: formData.emergencyContactPhone
+              })
+              .eq('id', borrowerId);
+            if (uErr) throw uErr;
+          } else {
+            const { data: newBorrower, error: bErr } = await supabase.from('borrowers').insert({
+              full_name: formData.fullName,
+              ic_number: formData.icNumber,
+              driving_license_number: formData.drivingLicense,
+              current_address: formData.address,
+              emergency_contact_name: formData.emergencyContactName,
+              emergency_contact_phone: formData.emergencyContactPhone
+            }).select().single();
+            if (bErr) throw bErr;
+            borrowerId = newBorrower.id;
+          }
 
           const { data: booking, error: bookErr } = await supabase.from('bookings').insert({
-            borrower_id: borrower.id,
+            borrower_id: borrowerId,
             vehicle_model: 'Proton Persona',
             start_datetime: formData.startDateTime,
             end_datetime: formData.endDateTime,
@@ -457,17 +480,43 @@ export default function WizardForm({ session }: { session: Session | null }) {
         calculatePrice()
       );
 
-      // Insert Borrower
-      const { data: borrower, error: bErr } = await supabase.from('borrowers').insert({
-        full_name: formData.fullName, ic_number: formData.icNumber,
-        driving_license_number: formData.drivingLicense, current_address: formData.address,
-        emergency_contact_name: formData.emergencyContactName, emergency_contact_phone: formData.emergencyContactPhone
-      }).select().single();
-      if (bErr) throw bErr;
+      // Check if borrower already exists
+      const { data: existingBorrower } = await supabase
+        .from('borrowers')
+        .select('id')
+        .eq('ic_number', formData.icNumber)
+        .maybeSingle();
+
+      let borrowerId = '';
+      if (existingBorrower) {
+        borrowerId = existingBorrower.id;
+        const { error: uErr } = await supabase
+          .from('borrowers')
+          .update({
+            full_name: formData.fullName,
+            driving_license_number: formData.drivingLicense,
+            current_address: formData.address,
+            emergency_contact_name: formData.emergencyContactName,
+            emergency_contact_phone: formData.emergencyContactPhone
+          })
+          .eq('id', borrowerId);
+        if (uErr) throw uErr;
+      } else {
+        const { data: newBorrower, error: bErr } = await supabase.from('borrowers').insert({
+          full_name: formData.fullName,
+          ic_number: formData.icNumber,
+          driving_license_number: formData.drivingLicense,
+          current_address: formData.address,
+          emergency_contact_name: formData.emergencyContactName,
+          emergency_contact_phone: formData.emergencyContactPhone
+        }).select().single();
+        if (bErr) throw bErr;
+        borrowerId = newBorrower.id;
+      }
 
       // Insert Booking
       const { data: booking, error: bookErr } = await supabase.from('bookings').insert({
-        borrower_id: borrower.id, vehicle_model: 'Proton Persona',
+        borrower_id: borrowerId, vehicle_model: 'Proton Persona',
         start_datetime: formData.startDateTime, end_datetime: formData.endDateTime,
         maintenance_share_amount: calculatePrice(), payment_status: 'Pending',
         pickup_location_name: formData.pickupLocationName || 'Terminal KL Sentral'
