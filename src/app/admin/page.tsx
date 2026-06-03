@@ -402,8 +402,8 @@ export default function AdminDashboard() {
                         </div>
 
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem', fontSize: '0.82rem', margin: '0.75rem 0', color: 'var(--text-2)' }}>
-                          <div>📅 Mula: {new Date(book.start_datetime).toLocaleString('ms-MY')}</div>
-                          <div>📅 Tamat: {new Date(book.end_datetime).toLocaleString('ms-MY')}</div>
+                          <div>📅 Mula: {new Date(book.start_date_time || book.start_datetime).toLocaleString('ms-MY')}</div>
+                          <div>📅 Tamat: {new Date(book.end_date_time || book.end_datetime).toLocaleString('ms-MY')}</div>
                           <div>📍 Pilihan Lokasi: {book.pickup_location_name || 'Default'}</div>
                           <div>💰 Sumbangan: RM {book.maintenance_share_amount?.toFixed(2) || '0.00'}</div>
                         </div>

@@ -419,8 +419,8 @@ export default function WizardForm({ session }: { session: Session | null }) {
           const { data: booking, error: bookErr } = await supabase.from('bookings').insert({
             borrower_id: borrowerId,
             vehicle_model: 'Proton Persona',
-            start_datetime: formData.startDateTime,
-            end_datetime: formData.endDateTime,
+            start_date_time: formData.startDateTime,
+            end_date_time: formData.endDateTime,
             maintenance_share_amount: calculatePrice(),
             payment_status: 'Pending',
             pickup_location_name: formData.pickupLocationName || 'Terminal KL Sentral'
@@ -517,7 +517,7 @@ export default function WizardForm({ session }: { session: Session | null }) {
       // Insert Booking
       const { data: booking, error: bookErr } = await supabase.from('bookings').insert({
         borrower_id: borrowerId, vehicle_model: 'Proton Persona',
-        start_datetime: formData.startDateTime, end_datetime: formData.endDateTime,
+        start_date_time: formData.startDateTime, end_date_time: formData.endDateTime,
         maintenance_share_amount: calculatePrice(), payment_status: 'Pending',
         pickup_location_name: formData.pickupLocationName || 'Terminal KL Sentral'
       }).select().single();
@@ -690,11 +690,11 @@ export default function WizardForm({ session }: { session: Session | null }) {
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', fontSize: '0.82rem' }}>
                       <div>
                         <div style={{ color: 'var(--text-3)', fontSize: '0.75rem' }}>Mula Perjalanan:</div>
-                        <div style={{ fontWeight: 600, color: 'var(--text-1)', marginTop: '0.15rem' }}>{new Date(activeBooking.start_datetime).toLocaleString('ms-MY')}</div>
+                        <div style={{ fontWeight: 600, color: 'var(--text-1)', marginTop: '0.15rem' }}>{new Date(activeBooking.start_date_time || activeBooking.start_datetime).toLocaleString('ms-MY')}</div>
                       </div>
                       <div>
                         <div style={{ color: 'var(--text-3)', fontSize: '0.75rem' }}>Tamat Perjalanan:</div>
-                        <div style={{ fontWeight: 600, color: 'var(--text-1)', marginTop: '0.15rem' }}>{new Date(activeBooking.end_datetime).toLocaleString('ms-MY')}</div>
+                        <div style={{ fontWeight: 600, color: 'var(--text-1)', marginTop: '0.15rem' }}>{new Date(activeBooking.end_date_time || activeBooking.end_datetime).toLocaleString('ms-MY')}</div>
                       </div>
                       <div>
                         <div style={{ color: 'var(--text-3)', fontSize: '0.75rem' }}>Model Kenderaan:</div>
@@ -854,8 +854,8 @@ export default function WizardForm({ session }: { session: Session | null }) {
                         </span>
                       </div>
                       <div style={{ fontSize: '0.78rem', color: 'var(--text-2)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.4rem' }}>
-                        <div>📅 Mula: {new Date(hist.start_datetime).toLocaleDateString('ms-MY')}</div>
-                        <div>📅 Tamat: {new Date(hist.end_datetime).toLocaleDateString('ms-MY')}</div>
+                        <div>📅 Mula: {new Date(hist.start_date_time || hist.start_datetime).toLocaleDateString('ms-MY')}</div>
+                        <div>📅 Tamat: {new Date(hist.end_date_time || hist.end_datetime).toLocaleDateString('ms-MY')}</div>
                         <div>📍 Lokasi: {hist.pickup_location_name || 'Terminal KL Sentral'}</div>
                         <div>💰 Jumlah: RM {hist.maintenance_share_amount?.toFixed(2) || '0.00'}</div>
                       </div>
