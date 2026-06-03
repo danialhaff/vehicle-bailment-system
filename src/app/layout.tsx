@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "VehicleShare — Secure Car Sharing Platform",
-  description: "Borrow and share vehicles securely with digital verification, e-signatures, and instant FPX payments.",
+  title: "KongsiRide — Drive Less. Share More.",
+  description: "Platform pengesahan pinjaman kenderaan persendirian dengan e-tandatangan, pengesahan KYC, dan pembayaran FPX selamat.",
 };
 
 export default function RootLayout({

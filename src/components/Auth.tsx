@@ -46,8 +46,7 @@ export default function Auth() {
     <div className="card" style={{ maxWidth: 420 }}>
       {/* Brand Header */}
       <div className="auth-brand-header">
-        <span className="auth-brand-icon">🚗</span>
-        <div className="auth-brand-name">VehicleShare</div>
+        <img src="/logo.png" alt="KongsiRide" style={{ height: '52px', width: 'auto', objectFit: 'contain', marginBottom: '0.25rem', position: 'relative', zIndex: 1 }} />
         <div className="auth-brand-sub">Platform Sewa Kenderaan Selamat</div>
       </div>
 

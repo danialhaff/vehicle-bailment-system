@@ -38,8 +38,7 @@ export default function Home() {
       {/* Top Navigation Bar */}
       <div className="topbar">
         <div className="topbar-logo">
-          <div className="topbar-logo-icon">🚗</div>
-          VehicleShare
+          <img src="/logo.png" alt="KongsiRide" style={{ height: '36px', width: 'auto', objectFit: 'contain' }} />
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           {!session && (
@@ -85,7 +84,7 @@ export default function Home() {
 
       {/* Footer */}
       <div style={{ marginTop: '2rem', textAlign: 'center', fontSize: '0.75rem', color: 'var(--text-3)', zIndex: 10 }}>
-        <p>© 2025 VehicleShare · Selamat · Dipercayai</p>
+        <p>© 2025 KongsiRide · Drive Less. Share More.</p>
       </div>
 
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>

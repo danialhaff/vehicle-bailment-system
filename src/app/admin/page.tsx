@@ -232,9 +232,9 @@ export default function AdminDashboard() {
     <div className="page">
       {/* Navbar */}
       <div className="topbar">
-        <div className="topbar-logo">
-          <div className="topbar-logo-icon" style={{ background: 'linear-gradient(135deg, var(--purple), var(--error))' }}>⚙️</div>
-          VehicleShare Admin
+        <div className="topbar-logo" style={{ gap: '0.5rem' }}>
+          <img src="/logo.png" alt="KongsiRide" style={{ height: '32px', width: 'auto', objectFit: 'contain' }} />
+          <span style={{ fontSize: '0.75rem', color: 'var(--text-3)', fontWeight: 600, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '6px', padding: '0.2rem 0.5rem' }}>Admin Panel</span>
         </div>
         {session && (
           <button className="btn-logout" onClick={() => supabase.auth.signOut()}>

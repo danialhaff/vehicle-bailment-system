@@ -91,14 +91,14 @@ export async function GET() {
   doc.setFont('Helvetica', 'oblique');
   doc.setFontSize(8.5);
   doc.setTextColor(148, 163, 184); // slate-400
-  doc.text('Dokumen ini dijana secara digital untuk kegunaan VehicleShare dan dipersetujui secara sah.', 105, y + 4, { align: 'center' });
+  doc.text('Dokumen ini dijana secara digital untuk kegunaan KongsiRide dan dipersetujui secara sah.', 105, y + 4, { align: 'center' });
 
   const pdfBuffer = doc.output('arraybuffer');
 
   return new Response(pdfBuffer, {
     headers: {
       'Content-Type': 'application/pdf',
-      'Content-Disposition': 'inline; filename="Terma_dan_Syarat_VehicleShare.pdf"'
+      'Content-Disposition': 'inline; filename="Terma_dan_Syarat_KongsiRide.pdf"'
     }
   });
 }

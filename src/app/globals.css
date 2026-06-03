@@ -1,35 +1,37 @@
 /* =============================================
-   VEHICLESHARE — Premium Design System v2
+   KONGSIRIDE — Brand Design System
    ============================================= */
 
 :root {
   --font: 'Plus Jakarta Sans', sans-serif;
 
-  /* Colors — richer palette */
-  --bg:          #04080f;
-  --bg-card:     #0a1628;
-  --surface:     #0f1f35;
-  --surface-2:   #142540;
+  /* Colors — KongsiRide brand: Navy + Green */
+  --bg:          #030a12;
+  --bg-card:     #07142a;
+  --surface:     #0c1f3d;
+  --surface-2:   #112447;
   --border:      rgba(255,255,255,0.09);
-  --border-focus: rgba(56,189,248,0.7);
+  --border-focus: rgba(37,99,235,0.7);
 
-  /* New cyan-blue primary */
-  --primary:     #0ea5e9;
-  --primary-2:   #38bdf8;
-  --primary-glow: rgba(14,165,233,0.4);
-  --purple:      #a78bfa;
-  --purple-glow: rgba(167,139,250,0.35);
-  --cyan:        #22d3ee;
-  --cyan-glow:   rgba(34,211,238,0.3);
+  /* KongsiRide Navy Blue primary */
+  --primary:     #2563eb;
+  --primary-2:   #3b82f6;
+  --primary-glow: rgba(37,99,235,0.4);
 
-  --text-1:      #f1f8ff;
-  --text-2:      #94b8d4;
-  --text-3:      #4a6a8a;
+  /* KongsiRide Emerald Green accent */
+  --purple:      #16a34a;
+  --purple-glow: rgba(22,163,74,0.35);
+  --cyan:        #22c55e;
+  --cyan-glow:   rgba(34,197,94,0.3);
 
-  --success:     #10b981;
-  --success-bg:  rgba(16,185,129,0.12);
-  --error:       #f87171;
-  --warning:     #fbbf24;
+  --text-1:      #f0f9ff;
+  --text-2:      #93c5fd;
+  --text-3:      #3b6ea8;
+
+  --success:     #16a34a;
+  --success-bg:  rgba(22,163,74,0.12);
+  --error:       #ef4444;
+  --warning:     #f59e0b;
 
   /* Spacing */
   --radius-sm:   8px;
@@ -83,16 +85,16 @@ p  { color: var(--text-2); line-height: 1.7; font-size: 0.95rem; }
   overflow-x: hidden;
 }
 
-/* Vivid animated mesh gradient background */
+/* KongsiRide brand gradients: navy-blue + emerald-green */
 .page::before {
   content: '';
   position: fixed;
   inset: 0;
   background:
-    radial-gradient(ellipse 70% 55% at 15% 5%,  rgba(14,165,233,0.45)  0%, transparent 55%),
-    radial-gradient(ellipse 55% 50% at 85% 90%, rgba(167,139,250,0.38) 0%, transparent 50%),
-    radial-gradient(ellipse 45% 40% at 55% 50%, rgba(34,211,238,0.18)  0%, transparent 45%),
-    radial-gradient(ellipse 60% 35% at 90% 10%, rgba(167,139,250,0.22) 0%, transparent 40%);
+    radial-gradient(ellipse 65% 50% at 10% 5%,  rgba(37,99,235,0.45)   0%, transparent 55%),
+    radial-gradient(ellipse 55% 50% at 90% 90%, rgba(22,163,74,0.38)   0%, transparent 50%),
+    radial-gradient(ellipse 40% 35% at 55% 50%, rgba(34,197,94,0.12)   0%, transparent 45%),
+    radial-gradient(ellipse 55% 35% at 85% 10%, rgba(16,185,129,0.18)  0%, transparent 40%);
   pointer-events: none;
   z-index: 0;
   animation: bgPulse 8s ease-in-out infinite alternate;
