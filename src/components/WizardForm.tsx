@@ -607,12 +607,10 @@ export default function WizardForm({ session }: { session: Session | null }) {
       {!isBookingMode && session ? (
         <div>
           {/* Welcome Header */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.75rem' }}>
-            <div>
-              <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-1)' }}>
-                Selamat Datang, {formData.fullName || session.user?.user_metadata?.fullName || 'Ahli'}! 👋
-              </h2>
-              <p style={{ fontSize: '0.8rem', color: 'var(--text-3)', marginTop: '0.1rem' }}>Uruskan tempahan, dokumen, dan maklumat pemanduan anda.</p>
+          <div className="dash-welcome">
+            <div className="dash-welcome-text">
+              <h2>Selamat Datang, {formData.fullName || session.user?.user_metadata?.fullName || 'Ahli'}! 👋</h2>
+              <p>Uruskan tempahan, dokumen, dan maklumat pemanduan anda.</p>
             </div>
             <button 
               onClick={() => { setIsBookingMode(true); setStep(1); }} 
@@ -624,55 +622,56 @@ export default function WizardForm({ session }: { session: Session | null }) {
           </div>
 
           {/* Stats Grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem', marginBottom: '1.5rem' }}>
-            <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '0.75rem 0.5rem', textAlign: 'center' }}>
-              <div style={{ fontSize: '0.68rem', color: 'var(--text-3)', fontWeight: 600, textTransform: 'uppercase' }}>Keahlian</div>
-              <div style={{ fontSize: '0.75rem', fontWeight: 700, color: session.user?.user_metadata?.is_verified ? 'var(--success)' : 'var(--warning)', marginTop: '0.35rem' }}>
+          <div className="stats-grid">
+            <div className="stat-card">
+              <div className="stat-card-label">Keahlian</div>
+              <div className="stat-card-value" style={{ color: session.user?.user_metadata?.is_verified ? 'var(--success)' : 'var(--warning)' }}>
                 {session.user?.user_metadata?.is_verified ? '🛡️ DISAHKAN' : '⏳ KELULUSAN'}
               </div>
             </div>
-            <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '0.75rem 0.5rem', textAlign: 'center' }}>
-              <div style={{ fontSize: '0.68rem', color: 'var(--text-3)', fontWeight: 600, textTransform: 'uppercase' }}>Jumlah Trip</div>
-              <div style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--primary-2)', marginTop: '0.15rem' }}>
+            <div className="stat-card">
+              <div className="stat-card-label">Jumlah Trip</div>
+              <div className="stat-card-value" style={{ color: 'var(--primary-2)', fontSize: '1rem' }}>
                 {bookingHistory.length} trip
               </div>
             </div>
-            <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '0.75rem 0.5rem', textAlign: 'center' }}>
-              <div style={{ fontSize: '0.68rem', color: 'var(--text-3)', fontWeight: 600, textTransform: 'uppercase' }}>Cagaran</div>
-              <div style={{ fontSize: '0.75rem', fontWeight: 700, color: activeBooking?.payment_status === 'Paid' ? 'var(--warning)' : 'var(--text-3)', marginTop: '0.35rem' }}>
-                {activeBooking?.payment_status === 'Paid' ? '🔒 RM 50 HELD' : 'TIADA DEPO'}
+            <div className="stat-card">
+              <div className="stat-card-label">Cagaran</div>
+              <div className="stat-card-value" style={{ color: activeBooking?.payment_status === 'Paid' ? 'var(--warning)' : 'var(--text-3)' }}>
+                {activeBooking?.payment_status === 'Paid' ? '🔒 RM50' : 'TIADA'}
               </div>
             </div>
           </div>
 
           {/* Tab Selection */}
-          <div style={{ display: 'flex', gap: '0.4rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem', marginBottom: '1.25rem' }}>
-            {[
-              { id: 'active', label: '🚗 Trip Aktif', icon: '⚡' },
-              { id: 'history', label: '🕰️ Sejarah Trip', icon: '📅' },
-              { id: 'profile', label: '👤 Profil & KYC', icon: '🪪' }
-            ].map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setUserTab(tab.id as any)}
-                style={{
-                  padding: '0.5rem 1rem',
-                  borderRadius: '6px',
-                  border: '1px solid ' + (userTab === tab.id ? 'var(--primary)' : 'transparent'),
-                  background: userTab === tab.id ? 'var(--primary)' : 'transparent',
-                  color: userTab === tab.id ? '#fff' : 'var(--text-2)',
-                  fontSize: '0.8rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.35rem'
-                }}
-              >
-                <span>{tab.icon}</span> {tab.label}
-              </button>
-            ))}
+          <div style={{ borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem', marginBottom: '1.25rem' }}>
+            <div className="tab-scroll-wrap">
+              {[
+                { id: 'active', label: '🚗 Trip Aktif' },
+                { id: 'history', label: '🕰️ Sejarah' },
+                { id: 'profile', label: '👤 Profil' }
+              ].map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setUserTab(tab.id as any)}
+                  style={{
+                    padding: '0.5rem 0.9rem',
+                    borderRadius: '6px',
+                    border: '1px solid ' + (userTab === tab.id ? 'var(--primary)' : 'transparent'),
+                    background: userTab === tab.id ? 'var(--primary)' : 'transparent',
+                    color: userTab === tab.id ? '#fff' : 'var(--text-2)',
+                    fontSize: '0.82rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0
+                  }}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Tab 1: Active Trip & Handover Manager */}
@@ -680,29 +679,29 @@ export default function WizardForm({ session }: { session: Session | null }) {
             <div>
               {activeBooking ? (
                 <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                    <span style={{ fontSize: '0.78rem', color: 'var(--success)', background: 'var(--success-bg)', padding: '0.25rem 0.6rem', borderRadius: '99px', fontWeight: 700 }}>🚗 TEMPAHAN AKTIF (LUNAS)</span>
-                    <span style={{ fontSize: '0.78rem', color: 'var(--text-3)' }}>Ref: #{activeBooking.id.slice(0, 8).toUpperCase()}</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.4rem' }}>
+                    <span className="badge badge-success">🚗 TEMPAHAN AKTIF (LUNAS)</span>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-3)', fontFamily: 'monospace' }}>#{activeBooking.id.slice(0, 8).toUpperCase()}</span>
                   </div>
 
                   {/* Trip Info Glass Box */}
                   <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '1rem 1.25rem', marginBottom: '1.25rem' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', fontSize: '0.82rem' }}>
+                    <div className="trip-info-grid">
                       <div>
-                        <div style={{ color: 'var(--text-3)', fontSize: '0.75rem' }}>Mula Perjalanan:</div>
-                        <div style={{ fontWeight: 600, color: 'var(--text-1)', marginTop: '0.15rem' }}>{new Date(activeBooking.start_date_time || activeBooking.start_datetime).toLocaleString('ms-MY')}</div>
+                        <div className="trip-info-label">Mula Perjalanan:</div>
+                        <div className="trip-info-value">{new Date(activeBooking.start_date_time || activeBooking.start_datetime).toLocaleString('ms-MY')}</div>
                       </div>
                       <div>
-                        <div style={{ color: 'var(--text-3)', fontSize: '0.75rem' }}>Tamat Perjalanan:</div>
-                        <div style={{ fontWeight: 600, color: 'var(--text-1)', marginTop: '0.15rem' }}>{new Date(activeBooking.end_date_time || activeBooking.end_datetime).toLocaleString('ms-MY')}</div>
+                        <div className="trip-info-label">Tamat Perjalanan:</div>
+                        <div className="trip-info-value">{new Date(activeBooking.end_date_time || activeBooking.end_datetime).toLocaleString('ms-MY')}</div>
                       </div>
                       <div>
-                        <div style={{ color: 'var(--text-3)', fontSize: '0.75rem' }}>Model Kenderaan:</div>
-                        <div style={{ fontWeight: 600, color: 'var(--text-1)', marginTop: '0.15rem' }}>🚗 PROTON PERSONA (Auto)</div>
+                        <div className="trip-info-label">Model Kenderaan:</div>
+                        <div className="trip-info-value">🚗 Proton Persona (Auto)</div>
                       </div>
                       <div>
-                        <div style={{ color: 'var(--text-3)', fontSize: '0.75rem' }}>Cagaran Keselamatan:</div>
-                        <div style={{ fontWeight: 600, color: 'var(--warning)', marginTop: '0.15rem' }}>RM 50.00 (Dipegang)</div>
+                        <div className="trip-info-label">Cagaran Keselamatan:</div>
+                        <div className="trip-info-value" style={{ color: 'var(--warning)' }}>RM 50.00 (Dipegang)</div>
                       </div>
                     </div>
                     
@@ -716,92 +715,74 @@ export default function WizardForm({ session }: { session: Session | null }) {
                   </div>
 
                   {/* Handover Upload Fasa 1 (Sebelum Trip) */}
-                  <div style={{ background: 'rgba(6,11,20,0.4)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '1.25rem', marginBottom: '1rem' }}>
-                    <h3 style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--primary-2)', marginBottom: '0.3rem' }}>📸 Fasa 1: Sebelum Mula Trip (Handover)</h3>
-                    <p style={{ fontSize: '0.78rem', color: 'var(--text-3)', marginBottom: '1rem' }}>Wajib dimuat naik sebelum mengambil kunci dan memandu kenderaan.</p>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                  <div className="handover-section">
+                    <h3 className="handover-section-title" style={{ color: 'var(--primary-2)' }}>📸 Fasa 1: Sebelum Mula Trip (Handover)</h3>
+                    <p className="handover-section-desc">Wajib dimuat naik sebelum mengambil kunci dan memandu kenderaan.</p>
+                    <div className="photo-grid">
                       {/* Fuel Before */}
-                      <div style={{ background: 'var(--surface-2)', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', textAlign: 'center' }}>
-                        <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-2)', marginBottom: '0.5rem' }}>⛽ Minyak Sebelum</div>
+                      <div className="photo-upload-card">
+                        <div className="photo-upload-title">⛽ Minyak Sebelum</div>
                         {handoverPhotos.fuelBefore ? (
-                          <div style={{ position: 'relative', width: '100%', height: '80px', borderRadius: '6px', overflow: 'hidden' }}>
-                            <img src={handoverPhotos.fuelBefore} alt="Fuel Before" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                          </div>
+                          <img src={handoverPhotos.fuelBefore} alt="Fuel Before" className="photo-thumb" />
                         ) : (
-                          <div>
-                            <label className="btn btn-secondary" style={{ padding: '0.35rem 0.6rem', fontSize: '0.75rem', cursor: 'pointer', display: 'inline-block' }}>
-                              📷 Ambil Foto
-                              <input type="file" accept="image/*" capture="environment" onChange={e => { if (e.target.files?.[0]) handleUploadPhoto('fuelBefore', e.target.files[0]); }} style={{ display: 'none' }} />
-                            </label>
-                          </div>
+                          <label className="photo-upload-btn">
+                            📷 Ambil Foto
+                            <input type="file" accept="image/*" capture="environment" onChange={e => { if (e.target.files?.[0]) handleUploadPhoto('fuelBefore', e.target.files[0]); }} style={{ display: 'none' }} />
+                          </label>
                         )}
                       </div>
 
                       {/* Car Before */}
-                      <div style={{ background: 'var(--surface-2)', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', textAlign: 'center' }}>
-                        <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-2)', marginBottom: '0.5rem' }}>🚗 Fizikal Sebelum</div>
+                      <div className="photo-upload-card">
+                        <div className="photo-upload-title">🚗 Fizikal Sebelum</div>
                         {handoverPhotos.carBefore ? (
-                          <div style={{ position: 'relative', width: '100%', height: '80px', borderRadius: '6px', overflow: 'hidden' }}>
-                            <img src={handoverPhotos.carBefore} alt="Car Before" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                          </div>
+                          <img src={handoverPhotos.carBefore} alt="Car Before" className="photo-thumb" />
                         ) : (
-                          <div>
-                            <label className="btn btn-secondary" style={{ padding: '0.35rem 0.6rem', fontSize: '0.75rem', cursor: 'pointer', display: 'inline-block' }}>
-                              📷 Ambil Foto
-                              <input type="file" accept="image/*" capture="environment" onChange={e => { if (e.target.files?.[0]) handleUploadPhoto('carBefore', e.target.files[0]); }} style={{ display: 'none' }} />
-                            </label>
-                          </div>
+                          <label className="photo-upload-btn">
+                            📷 Ambil Foto
+                            <input type="file" accept="image/*" capture="environment" onChange={e => { if (e.target.files?.[0]) handleUploadPhoto('carBefore', e.target.files[0]); }} style={{ display: 'none' }} />
+                          </label>
                         )}
                       </div>
                     </div>
                   </div>
 
                   {/* Handover Upload Fasa 2 (Selepas Trip) */}
-                  <div style={{ background: 'rgba(6,11,20,0.4)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '1.25rem', marginBottom: '1.5rem' }}>
-                    <h3 style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--purple)', marginBottom: '0.3rem' }}>📸 Fasa 2: Selepas Tamat Trip (Return)</h3>
-                    <p style={{ fontSize: '0.78rem', color: 'var(--text-3)', marginBottom: '1rem' }}>Wajib dimuat naik sejurus sebelum mengembalikan kunci dan mengunci kenderaan.</p>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                  <div className="handover-section" style={{ marginBottom: '1.5rem' }}>
+                    <h3 className="handover-section-title" style={{ color: 'var(--purple)' }}>📸 Fasa 2: Selepas Tamat Trip (Return)</h3>
+                    <p className="handover-section-desc">Wajib dimuat naik sejurus sebelum mengembalikan kunci dan mengunci kenderaan.</p>
+                    <div className="photo-grid">
                       {/* Fuel After */}
-                      <div style={{ background: 'var(--surface-2)', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', textAlign: 'center' }}>
-                        <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-2)', marginBottom: '0.5rem' }}>⛽ Minyak Selepas</div>
+                      <div className="photo-upload-card">
+                        <div className="photo-upload-title">⛽ Minyak Selepas</div>
                         {handoverPhotos.fuelAfter ? (
-                          <div style={{ position: 'relative', width: '100%', height: '80px', borderRadius: '6px', overflow: 'hidden' }}>
-                            <img src={handoverPhotos.fuelAfter} alt="Fuel After" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                          </div>
+                          <img src={handoverPhotos.fuelAfter} alt="Fuel After" className="photo-thumb" />
                         ) : (
-                          <div>
-                            {(!handoverPhotos.fuelBefore || !handoverPhotos.carBefore) ? (
-                              <span style={{ fontSize: '0.75rem', color: 'var(--text-3)', display: 'inline-block', padding: '0.35rem 0' }}>🔒 Sila selesai Fasa 1</span>
-                            ) : (
-                              <label className="btn btn-secondary" style={{ padding: '0.35rem 0.6rem', fontSize: '0.75rem', cursor: 'pointer', display: 'inline-block' }}>
-                                📷 Ambil Foto
-                                <input type="file" accept="image/*" capture="environment" onChange={e => { if (e.target.files?.[0]) handleUploadPhoto('fuelAfter', e.target.files[0]); }} style={{ display: 'none' }} />
-                              </label>
-                            )}
-                          </div>
+                          (!handoverPhotos.fuelBefore || !handoverPhotos.carBefore) ? (
+                            <span className="photo-locked">🔒 Sila selesai Fasa 1</span>
+                          ) : (
+                            <label className="photo-upload-btn">
+                              📷 Ambil Foto
+                              <input type="file" accept="image/*" capture="environment" onChange={e => { if (e.target.files?.[0]) handleUploadPhoto('fuelAfter', e.target.files[0]); }} style={{ display: 'none' }} />
+                            </label>
+                          )
                         )}
                       </div>
 
                       {/* Car After */}
-                      <div style={{ background: 'var(--surface-2)', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', textAlign: 'center' }}>
-                        <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-2)', marginBottom: '0.5rem' }}>🚗 Fizikal Selepas</div>
+                      <div className="photo-upload-card">
+                        <div className="photo-upload-title">🚗 Fizikal Selepas</div>
                         {handoverPhotos.carAfter ? (
-                          <div style={{ position: 'relative', width: '100%', height: '80px', borderRadius: '6px', overflow: 'hidden' }}>
-                            <img src={handoverPhotos.carAfter} alt="Car After" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                          </div>
+                          <img src={handoverPhotos.carAfter} alt="Car After" className="photo-thumb" />
                         ) : (
-                          <div>
-                            {(!handoverPhotos.fuelBefore || !handoverPhotos.carBefore) ? (
-                              <span style={{ fontSize: '0.75rem', color: 'var(--text-3)', display: 'inline-block', padding: '0.35rem 0' }}>🔒 Sila selesai Fasa 1</span>
-                            ) : (
-                              <label className="btn btn-secondary" style={{ padding: '0.35rem 0.6rem', fontSize: '0.75rem', cursor: 'pointer', display: 'inline-block' }}>
-                                📷 Ambil Foto
-                                <input type="file" accept="image/*" capture="environment" onChange={e => { if (e.target.files?.[0]) handleUploadPhoto('carAfter', e.target.files[0]); }} style={{ display: 'none' }} />
-                              </label>
-                            )}
-                          </div>
+                          (!handoverPhotos.fuelBefore || !handoverPhotos.carBefore) ? (
+                            <span className="photo-locked">🔒 Sila selesai Fasa 1</span>
+                          ) : (
+                            <label className="photo-upload-btn">
+                              📷 Ambil Foto
+                              <input type="file" accept="image/*" capture="environment" onChange={e => { if (e.target.files?.[0]) handleUploadPhoto('carAfter', e.target.files[0]); }} style={{ display: 'none' }} />
+                            </label>
+                          )
                         )}
                       </div>
                     </div>
@@ -812,16 +793,15 @@ export default function WizardForm({ session }: { session: Session | null }) {
                   </div>
                 </div>
               ) : (
-                <div style={{ background: 'rgba(6,11,20,0.3)', border: '1px dashed var(--border)', borderRadius: 'var(--radius-lg)', padding: '2.5rem 1.5rem', textAlign: 'center' }}>
-                  <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>🍃</div>
-                  <h4 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-1)', marginBottom: '0.4rem' }}>Tiada Pemanduan Aktif Semasa</h4>
-                  <p style={{ fontSize: '0.8rem', color: 'var(--text-3)', maxWidth: '360px', margin: '0 auto 1.5rem', lineHeight: 1.5 }}>
+                <div className="empty-state">
+                  <div className="empty-state-icon">🍃</div>
+                  <h4 className="empty-state-title">Tiada Pemanduan Aktif Semasa</h4>
+                  <p className="empty-state-desc">
                     Anda tiada tempahan perjalanan kenderaan aktif buat masa sekarang. Klik di bawah untuk mula merancang perjalanan anda dengan Proton Persona!
                   </p>
                   <button 
                     onClick={() => { setIsBookingMode(true); setStep(1); }} 
                     className="btn btn-primary"
-                    style={{ fontSize: '0.85rem', padding: '0.6rem 1.5rem' }}
                   >
                     ➕ Mulakan Tempahan Kenderaan
                   </button>
@@ -839,25 +819,21 @@ export default function WizardForm({ session }: { session: Session | null }) {
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                   {bookingHistory.map(hist => (
-                    <div key={hist.id} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '0.85rem 1rem' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                    <div key={hist.id} className="booking-hist-card">
+                      <div className="booking-hist-header">
                         <span style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text-1)' }}>🚗 Proton Persona (Auto)</span>
-                        <span style={{
-                          fontSize: '0.7rem',
-                          fontWeight: 700,
-                          padding: '0.15rem 0.5rem',
-                          borderRadius: '99px',
-                          background: hist.payment_status === 'Paid' ? 'var(--success-bg)' : hist.payment_status === 'Cancelled' ? 'rgba(248,113,113,0.1)' : 'rgba(251,191,36,0.12)',
-                          color: hist.payment_status === 'Paid' ? 'var(--success)' : hist.payment_status === 'Cancelled' ? 'var(--error)' : 'var(--warning)'
-                        }}>
-                          {hist.payment_status === 'Paid' ? 'LUNAS (Paid)' : hist.payment_status === 'Cancelled' ? 'BATAL' : 'PENDING'}
+                        <span className={`badge ${
+                          hist.payment_status === 'Paid' ? 'badge-success' :
+                          hist.payment_status === 'Cancelled' ? 'badge-error' : 'badge-pending'
+                        }`}>
+                          {hist.payment_status === 'Paid' ? 'LUNAS' : hist.payment_status === 'Cancelled' ? 'BATAL' : 'PENDING'}
                         </span>
                       </div>
-                      <div style={{ fontSize: '0.78rem', color: 'var(--text-2)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.4rem' }}>
+                      <div className="booking-hist-details">
                         <div>📅 Mula: {new Date(hist.start_date_time || hist.start_datetime).toLocaleDateString('ms-MY')}</div>
                         <div>📅 Tamat: {new Date(hist.end_date_time || hist.end_datetime).toLocaleDateString('ms-MY')}</div>
-                        <div>📍 Lokasi: {hist.pickup_location_name || 'Terminal KL Sentral'}</div>
-                        <div>💰 Jumlah: RM {hist.maintenance_share_amount?.toFixed(2) || '0.00'}</div>
+                        <div>📍 {hist.pickup_location_name || 'Terminal KL Sentral'}</div>
+                        <div>💰 RM {hist.maintenance_share_amount?.toFixed(2) || '0.00'}</div>
                       </div>
                     </div>
                   ))}
@@ -871,26 +847,26 @@ export default function WizardForm({ session }: { session: Session | null }) {
             <div>
               <h3 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.75rem', color: 'var(--text-1)' }}>👤 Maklumat Profil Terperinci Ahli</h3>
               <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '1.25rem' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', fontSize: '0.82rem' }}>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', borderBottom: '1px solid rgba(255,255,255,0.04)', paddingBottom: '0.5rem' }}>
-                    <span style={{ color: 'var(--text-3)' }}>Nama Penuh Ahli:</span>
-                    <span style={{ fontWeight: 600, color: 'var(--text-1)' }}>{formData.fullName || 'N/A'}</span>
+                <div>
+                  <div className="profile-row">
+                    <span className="profile-row-label">Nama Penuh Ahli:</span>
+                    <span className="profile-row-value">{formData.fullName || 'N/A'}</span>
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', borderBottom: '1px solid rgba(255,255,255,0.04)', paddingBottom: '0.5rem' }}>
-                    <span style={{ color: 'var(--text-3)' }}>No. Kad Pengenalan:</span>
-                    <span style={{ fontWeight: 600, color: 'var(--text-1)' }}>{formData.icNumber || 'N/A'}</span>
+                  <div className="profile-row">
+                    <span className="profile-row-label">No. Kad Pengenalan:</span>
+                    <span className="profile-row-value">{formData.icNumber || 'N/A'}</span>
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', borderBottom: '1px solid rgba(255,255,255,0.04)', paddingBottom: '0.5rem' }}>
-                    <span style={{ color: 'var(--text-3)' }}>No. Lesen Memandu:</span>
-                    <span style={{ fontWeight: 600, color: 'var(--text-1)' }}>{formData.drivingLicense || 'N/A'}</span>
+                  <div className="profile-row">
+                    <span className="profile-row-label">No. Lesen Memandu:</span>
+                    <span className="profile-row-value">{formData.drivingLicense || 'N/A'}</span>
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', borderBottom: '1px solid rgba(255,255,255,0.04)', paddingBottom: '0.5rem' }}>
-                    <span style={{ color: 'var(--text-3)' }}>Alamat Tempat Tinggal:</span>
-                    <span style={{ fontWeight: 600, color: 'var(--text-1)' }}>{formData.address || 'N/A'}</span>
+                  <div className="profile-row">
+                    <span className="profile-row-label">Alamat Tinggal:</span>
+                    <span className="profile-row-value">{formData.address || 'N/A'}</span>
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr' }}>
-                    <span style={{ color: 'var(--text-3)' }}>Waris / Kenalan Kecemasan:</span>
-                    <span style={{ fontWeight: 600, color: 'var(--text-1)' }}>
+                  <div className="profile-row">
+                    <span className="profile-row-label">Kenalan Kecemasan:</span>
+                    <span className="profile-row-value">
                       {formData.emergencyContactName ? `${formData.emergencyContactName} (${formData.emergencyContactPhone})` : 'N/A'}
                     </span>
                   </div>

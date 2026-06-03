@@ -308,33 +308,34 @@ export default function AdminDashboard() {
         /* Admin Main Workspace */
         <div style={{ width: '100%', maxWidth: '960px', zIndex: 10 }}>
           {/* Dashboard Navigation Tabs */}
-          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem' }}>
-            {[
-              { id: 'bookings', label: '📅 Urus Tempahan', icon: '🚗' },
-              { id: 'kyc', label: '🪪 Pengesahan KYC', icon: '🔍' },
-              { id: 'locations', label: '📍 Lokasi Pickup', icon: '🗺️' }
-            ].map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                style={{
-                  padding: '0.6rem 1.25rem',
-                  borderRadius: '8px',
-                  border: '1px solid ' + (activeTab === tab.id ? 'var(--primary)' : 'var(--border)'),
-                  background: activeTab === tab.id ? 'var(--primary)' : 'var(--surface)',
-                  color: activeTab === tab.id ? '#fff' : 'var(--text-2)',
-                  fontSize: '0.85rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.4rem'
-                }}
-              >
-                <span>{tab.icon}</span> {tab.label}
-              </button>
-            ))}
+          <div style={{ borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem', marginBottom: '1.5rem' }}>
+            <div className="tab-scroll-wrap">
+              {[
+                { id: 'bookings', label: '📅 Urus Tempahan' },
+                { id: 'kyc', label: '🪪 Pengesahan KYC' },
+                { id: 'locations', label: '📍 Lokasi Pickup' }
+              ].map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as any)}
+                  style={{
+                    padding: '0.6rem 1.1rem',
+                    borderRadius: '8px',
+                    border: '1px solid ' + (activeTab === tab.id ? 'var(--primary)' : 'var(--border)'),
+                    background: activeTab === tab.id ? 'var(--primary)' : 'var(--surface)',
+                    color: activeTab === tab.id ? '#fff' : 'var(--text-2)',
+                    fontSize: '0.85rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0
+                  }}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* ─── TAB 1: BOOKINGS ─── */}
@@ -412,7 +413,7 @@ export default function AdminDashboard() {
                         {book.payment_status === 'Paid' && (
                           <div style={{ marginTop: '1rem', background: 'rgba(6,11,20,0.3)', borderRadius: '8px', padding: '0.75rem', border: '1px solid rgba(255,255,255,0.04)' }}>
                             <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--primary-2)', marginBottom: '0.5rem' }}>📸 Foto Bukti Trip (Handover):</div>
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.5rem' }}>
+                            <div className="admin-photo-grid">
                               {[
                                 { name: 'Minyak Mula', file: 'fuel_before' },
                                 { name: 'Fizikal Mula', file: 'car_before' },
@@ -421,10 +422,10 @@ export default function AdminDashboard() {
                               ].map(photo => {
                                 const url = getHandoverPhotoUrl(book.id, photo.file as any);
                                 return (
-                                  <div key={photo.name} style={{ textAlign: 'center', fontSize: '0.7rem' }}>
-                                    <div style={{ color: 'var(--text-3)', marginBottom: '0.2rem' }}>{photo.name}</div>
-                                    <a href={url} target="_blank" rel="noopener noreferrer" style={{ display: 'block', height: '55px', borderRadius: '4px', overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--surface-2)' }}>
-                                      <img src={url} alt={photo.name} onError={(e) => { e.currentTarget.style.display = 'none'; }} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                  <div key={photo.name} className="admin-photo-item">
+                                    <div className="admin-photo-label">{photo.name}</div>
+                                    <a href={url} target="_blank" rel="noopener noreferrer" className="admin-photo-thumb">
+                                      <img src={url} alt={photo.name} onError={(e) => { e.currentTarget.style.display = 'none'; }} />
                                     </a>
                                   </div>
                                 );
@@ -434,20 +435,18 @@ export default function AdminDashboard() {
                         )}
 
                         {/* Actions Panel */}
-                        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.04)', paddingTop: '0.75rem', justifyContent: 'flex-end' }}>
+                        <div className="admin-actions">
                           <button
                             onClick={() => handleUpdateBookingStatus(book.id, 'Paid')}
-                            disabled={book.payment_status === 'Paid'}
-                            className="btn btn-secondary"
-                            style={{ padding: '0.4rem 0.8rem', fontSize: '0.78rem', background: 'var(--success-bg)', color: 'var(--success)', border: 'none' }}
+                            disabled={book.payment_status === 'Paid' || actionLoading}
+                            className="btn-approve"
                           >
                             ✓ Tanda Lunas
                           </button>
                           <button
                             onClick={() => handleUpdateBookingStatus(book.id, 'Cancelled')}
-                            disabled={book.payment_status === 'Cancelled'}
-                            className="btn btn-secondary"
-                            style={{ padding: '0.4rem 0.8rem', fontSize: '0.78rem', background: 'rgba(248,113,113,0.1)', color: 'var(--error)', border: 'none' }}
+                            disabled={book.payment_status === 'Cancelled' || actionLoading}
+                            className="btn-cancel-booking"
                           >
                             ✗ Batal Tempahan
                           </button>
