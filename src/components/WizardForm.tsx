@@ -116,7 +116,7 @@ export default function WizardForm({ session }: { session: Session | null }) {
         }));
       }
       // Check if user has bookings and fetch full dashboard details
-      fetchActiveBooking(session.user);
+      fetchActiveBooking(session.user, true);
     } else {
       // Clear active booking, history and reset to step 1 booking form if logged out
       setActiveBooking(null);
@@ -131,15 +131,19 @@ export default function WizardForm({ session }: { session: Session | null }) {
   }, [paymentStatus]);
 
   // Fetch active booking and history of the logged in user
-  const fetchActiveBooking = async (user: any) => {
+  const fetchActiveBooking = async (user: any, forceDefaultMode = false) => {
     if (!user) return;
     setCheckingBooking(true);
     try {
       const icNumber = user.user_metadata?.icNumber;
       if (!icNumber) {
-        // Logged in but not verified (no profile IC), show booking form
-        setIsBookingMode(true);
-        setStep(1);
+        // Logged in but not verified (no profile IC)
+        if (forceDefaultMode) {
+          setIsBookingMode(true);
+          setStep(1);
+        }
+        setActiveBooking(null);
+        setBookingHistory([]);
         setCheckingBooking(false);
         return;
       }
@@ -361,7 +365,7 @@ export default function WizardForm({ session }: { session: Session | null }) {
           if (meta?.is_verified) {
             // Already verified user, proceed straight to Step 4 (Payment)
             setStep(4);
-            fetchActiveBooking(data.user);
+            fetchActiveBooking(data.user, true);
           } else {
             // Unverified logged in user
             setStep(2);
@@ -837,7 +841,9 @@ export default function WizardForm({ session }: { session: Session | null }) {
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr' }}>
                     <span style={{ color: 'var(--text-3)' }}>Waris / Kenalan Kecemasan:</span>
-                    <span style={{ fontWeight: 600, color: 'var(--text-1)' }}>{formData.emergencyContactName} ({formData.emergencyContactPhone})</span>
+                    <span style={{ fontWeight: 600, color: 'var(--text-1)' }}>
+                      {formData.emergencyContactName ? `${formData.emergencyContactName} (${formData.emergencyContactPhone})` : 'N/A'}
+                    </span>
                   </div>
                 </div>
               </div>
