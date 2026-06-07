@@ -75,11 +75,11 @@ export default function AdminDashboard() {
         userEmail !== 'danialhafiz.dh1@gmail.com' && 
         metadataRole !== 'admin'
       ) {
-        alert('Akses Ditolak. Akaun anda bukan Pentadbir (Admin).');
+        alert('Access Denied. Your account is not an Administrator (Admin).');
         await supabase.auth.signOut();
       }
     } catch (err: any) {
-      alert(`Ralat log masuk: ${err.message}`);
+      alert(`Login error: ${err.message}`);
     } finally {
       setActionLoading(false);
     }
@@ -156,7 +156,7 @@ export default function AdminDashboard() {
         .eq('id', bookingId);
 
       if (error) throw error;
-      alert(`Status tempahan dikemaskini kepada: ${status}`);
+      alert(`Booking status updated to: ${status}`);
       fetchAdminData();
     } catch (err: any) {
       alert(`Ralat: ${err.message}`);
@@ -176,7 +176,7 @@ export default function AdminDashboard() {
         .insert({ name: newLocName, address: newLocAddress, is_active: true });
 
       if (error) throw error;
-      alert('Lokasi pickup berjaya ditambahkan!');
+      alert('Pickup location added successfully!');
       setNewLocName('');
       setNewLocAddress('');
       fetchAdminData();
@@ -193,7 +193,7 @@ export default function AdminDashboard() {
       alert('Lokasi ini adalah contoh lalai. Sila jalankan skrip SQL di Supabase untuk mengurus lokasi dinamik.');
       return;
     }
-    if (!confirm('Adakah anda pasti mahu memadam lokasi ini?')) return;
+    if (!confirm('Are you sure you want to delete this location?')) return;
     setActionLoading(true);
     try {
       const { error } = await supabase
@@ -202,7 +202,7 @@ export default function AdminDashboard() {
         .eq('id', id);
 
       if (error) throw error;
-      alert('Lokasi berjaya dipadam!');
+      alert('Location deleted successfully!');
       fetchAdminData();
     } catch (err: any) {
       alert(`Ralat: ${err.message}`);
@@ -221,7 +221,7 @@ export default function AdminDashboard() {
       <div className="page" style={{ justifyContent: 'center' }}>
         <div style={{ textAlign: 'center' }}>
           <div style={{ width: 40, height: 40, border: '3px solid var(--border)', borderTopColor: 'var(--primary)', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 1rem' }} />
-          <p style={{ color: 'var(--text-3)', fontSize: '0.85rem' }}>Memuatkan Papan Pemuka Admin...</p>
+          <p style={{ color: 'var(--text-3)', fontSize: '0.85rem' }}>Loading Admin Dashboard...</p>
         </div>
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
@@ -238,7 +238,7 @@ export default function AdminDashboard() {
         </div>
         {session && (
           <button className="btn-logout" onClick={() => supabase.auth.signOut()}>
-            Log Keluar
+            Log Out
           </button>
         )}
       </div>
@@ -248,28 +248,28 @@ export default function AdminDashboard() {
         <div className="card" style={{ maxWidth: 400, marginTop: '2rem' }}>
           {session && !isAdmin() && (
             <div style={{ background: 'rgba(248,113,113,0.1)', color: 'var(--error)', padding: '0.75rem', borderRadius: '8px', marginBottom: '1rem', fontSize: '0.82rem', textAlign: 'center', fontWeight: 600 }}>
-              ⚠️ Akses Ditolak: Akaun ({session.user?.email}) bukan Pentadbir (Admin). Sila log keluar dan log masuk semula dengan e-mel admin yang betul.
+              ⚠️ Access Denied: Akaun ({session.user?.email}) bukan Pentadbir (Admin). Sila log keluar dan log masuk semula dengan e-mel admin yang betul.
             </div>
           )}
 
           <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
             <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>🛡️</div>
-            <h2 className="section-title">Log Masuk Pentadbir</h2>
-            <p className="text-sm" style={{ color: 'var(--text-3)' }}>Akses khas untuk pemilik menguruskan sistem tempahan.</p>
+            <h2 className="section-title">Administrator Login</h2>
+            <p className="text-sm" style={{ color: 'var(--text-3)' }}>Special access for owners to manage the booking system.</p>
           </div>
 
           <form onSubmit={handleLogin}>
             <div className="form-group">
-              <label className="form-label">E-mel Admin</label>
+              <label className="form-label">Admin Email</label>
               <input type="email" value={email} onChange={e => setEmail(e.target.value)} className="form-input" placeholder="admin@email.com" required />
             </div>
             <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-              <label className="form-label">Kata Laluan</label>
+              <label className="form-label">Password</label>
               <input type="password" value={password} onChange={e => setPassword(e.target.value)} className="form-input" placeholder="••••••••" required />
             </div>
 
             <button className="btn btn-primary w-full" type="submit" disabled={actionLoading}>
-              {actionLoading ? '⏳ Mengesahkan...' : 'Masuk Panel Kawalan 🛡️'}
+              {actionLoading ? '⏳ Mengesahkan...' : 'Log In Control Panel 🛡️'}
             </button>
           </form>
 
@@ -301,7 +301,7 @@ export default function AdminDashboard() {
               <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
               <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/>
             </svg>
-            Teruskan dengan Google (Admin)
+            Continue with Google (Admin)
           </button>
         </div>
       ) : (
@@ -311,9 +311,9 @@ export default function AdminDashboard() {
           <div style={{ borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem', marginBottom: '1.5rem' }}>
             <div className="tab-scroll-wrap">
               {[
-                { id: 'bookings', label: '📅 Urus Tempahan' },
-                { id: 'kyc', label: '🪪 Pengesahan KYC' },
-                { id: 'locations', label: '📍 Lokasi Pickup' }
+                { id: 'bookings', label: '📅 Manage Bookings' },
+                { id: 'kyc', label: '🪪 KYC Verification' },
+                { id: 'locations', label: '📍 Pickup Locations' }
               ].map(tab => (
                 <button
                   key={tab.id}
@@ -341,13 +341,13 @@ export default function AdminDashboard() {
           {/* ─── TAB 1: BOOKINGS ─── */}
           {activeTab === 'bookings' && (
             <div className="card" style={{ maxWidth: '100%' }}>
-              <h2 className="section-title">📅 Urusan Tempahan Kenderaan</h2>
-              <p className="section-subtitle">Tinjau status bayaran, kontrak PDF bertandatangan, dan gambar sebelum/selepas perjalanan.</p>
+              <h2 className="section-title">📅 Vehicle Booking Management</h2>
+              <p className="section-subtitle">Review payment status, signed PDF agreements, and before/after trip photos.</p>
 
               {/* Status Filter buttons */}
               <div style={{ display: 'flex', gap: '0.4rem', marginBottom: '1.5rem', flexWrap: 'wrap', borderBottom: '1px solid rgba(255,255,255,0.04)', paddingBottom: '1rem' }}>
                 {[
-                  { id: 'All', label: 'Semua Tempahan' },
+                  { id: 'All', label: 'All Bookings' },
                   { id: 'Pending', label: '⏳ Pending' },
                   { id: 'Paid', label: '💰 Paid' },
                   { id: 'Cancelled', label: '✗ Cancelled' }
@@ -374,7 +374,7 @@ export default function AdminDashboard() {
 
               {bookings.filter(b => statusFilter === 'All' ? true : b.payment_status === statusFilter).length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '3rem 0', color: 'var(--text-3)' }}>
-                  Tiada rekod tempahan padan dengan status "{statusFilter}".
+                  No booking records match the status "{statusFilter}".
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -387,7 +387,7 @@ export default function AdminDashboard() {
                       <div key={book.id} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '1.25rem' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.75rem' }}>
                           <div>
-                            <h3 style={{ fontSize: '1rem', color: 'var(--text-1)' }}>Peminjam: {book.borrowers?.full_name || 'Tiada Nama'}</h3>
+                            <h3 style={{ fontSize: '1rem', color: 'var(--text-1)' }}>Borrower: {book.borrowers?.full_name || 'No Name'}</h3>
                             <p style={{ fontSize: '0.78rem', color: 'var(--text-3)' }}>Ref ID: {book.id.toUpperCase()}</p>
                           </div>
                           <span style={{
@@ -398,27 +398,27 @@ export default function AdminDashboard() {
                             background: book.payment_status === 'Paid' ? 'var(--success-bg)' : 'rgba(251,191,36,0.12)',
                             color: book.payment_status === 'Paid' ? 'var(--success)' : 'var(--warning)'
                           }}>
-                            💰 {book.payment_status === 'Paid' ? 'LUNAS (Paid)' : book.payment_status === 'Cancelled' ? 'BATAL' : 'PENDING'}
+                            💰 {book.payment_status === 'Paid' ? 'PAID (Paid)' : book.payment_status === 'Cancelled' ? 'CANCELLED' : 'PENDING'}
                           </span>
                         </div>
 
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem', fontSize: '0.82rem', margin: '0.75rem 0', color: 'var(--text-2)' }}>
-                          <div>📅 Mula: {new Date(book.start_date_time || book.start_datetime).toLocaleString('ms-MY')}</div>
-                          <div>📅 Tamat: {new Date(book.end_date_time || book.end_datetime).toLocaleString('ms-MY')}</div>
-                          <div>📍 Pilihan Lokasi: {book.pickup_location_name || 'Default'}</div>
-                          <div>💰 Sumbangan: RM {book.maintenance_share_amount?.toFixed(2) || '0.00'}</div>
+                          <div>📅 Start: {new Date(book.start_date_time || book.start_datetime).toLocaleString('en-US')}</div>
+                          <div>📅 End: {new Date(book.end_date_time || book.end_datetime).toLocaleString('en-US')}</div>
+                          <div>📍 Selected Location: {book.pickup_location_name || 'Default'}</div>
+                          <div>💰 Contribution: RM {book.maintenance_share_amount?.toFixed(2) || '0.00'}</div>
                         </div>
 
                         {/* Handover Photos Preview Section */}
                         {book.payment_status === 'Paid' && (
                           <div style={{ marginTop: '1rem', background: 'rgba(6,11,20,0.3)', borderRadius: '8px', padding: '0.75rem', border: '1px solid rgba(255,255,255,0.04)' }}>
-                            <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--primary-2)', marginBottom: '0.5rem' }}>📸 Foto Bukti Trip (Handover):</div>
+                            <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--primary-2)', marginBottom: '0.5rem' }}>📸 Trip Proof Photos (Handover):</div>
                             <div className="admin-photo-grid">
                               {[
-                                { name: 'Minyak Mula', file: 'fuel_before' },
-                                { name: 'Fizikal Mula', file: 'car_before' },
-                                { name: 'Minyak Tamat', file: 'fuel_after' },
-                                { name: 'Fizikal Tamat', file: 'car_after' }
+                                { name: 'Fuel Start', file: 'fuel_before' },
+                                { name: 'Physical Start', file: 'car_before' },
+                                { name: 'Fuel End', file: 'fuel_after' },
+                                { name: 'Physical End', file: 'car_after' }
                               ].map(photo => {
                                 const url = getHandoverPhotoUrl(book.id, photo.file as any);
                                 return (
@@ -441,14 +441,14 @@ export default function AdminDashboard() {
                             disabled={book.payment_status === 'Paid' || actionLoading}
                             className="btn-approve"
                           >
-                            ✓ Tanda Lunas
+                            ✓ Mark Paid
                           </button>
                           <button
                             onClick={() => handleUpdateBookingStatus(book.id, 'Cancelled')}
                             disabled={book.payment_status === 'Cancelled' || actionLoading}
                             className="btn-cancel-booking"
                           >
-                            ✗ Batal Tempahan
+                            ✗ Cancel Booking
                           </button>
                         </div>
                       </div>
@@ -462,8 +462,8 @@ export default function AdminDashboard() {
           {/* ─── TAB 2: KYC VERIFICATION ─── */}
           {activeTab === 'kyc' && (
             <div className="card" style={{ maxWidth: '100%' }}>
-              <h2 className="section-title">🔍 Urusan Pengesahan Ahli (KYC)</h2>
-              <p className="section-subtitle">Periksa kad pengenalan, lesen memandu, dan foto pengesahan diri peminjam baharu.</p>
+              <h2 className="section-title">🔍 Member Verification (KYC)</h2>
+              <p className="section-subtitle">Inspect ID cards, driving licenses, and self-verification photos of new borrowers.</p>
 
               {verificationMedia.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '3rem 0', color: 'var(--text-3)' }}>Tiada rekod pengesahan media untuk diteliti.</div>
@@ -483,22 +483,22 @@ export default function AdminDashboard() {
                             background: approvedKycIds.includes(media.id) ? 'var(--success-bg)' : 'rgba(251,191,36,0.12)',
                             color: approvedKycIds.includes(media.id) ? 'var(--success)' : 'var(--warning)'
                           }}>
-                            {approvedKycIds.includes(media.id) ? '🛡️ KYC DISAHKAN' : '⏳ MENUNGGU KELULUSAN'}
+                            {approvedKycIds.includes(media.id) ? '🛡️ KYC VERIFIED' : '⏳ PENDING APPROVAL'}
                           </span>
                         </div>
                         
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem', fontSize: '0.82rem', marginBottom: '1rem', color: 'var(--text-2)' }}>
-                          <div>No. IC: {borrower?.ic_number || 'N/A'}</div>
-                          <div>No. Lesen: {borrower?.driving_license_number || 'N/A'}</div>
-                          <div>Alamat: {borrower?.current_address || 'N/A'}</div>
+                          <div>IC/ID Number: {borrower?.ic_number || 'N/A'}</div>
+                          <div>License Number: {borrower?.driving_license_number || 'N/A'}</div>
+                          <div>Address: {borrower?.current_address || 'N/A'}</div>
                         </div>
 
                         {/* Documents Grid */}
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '0.75rem', marginBottom: '1rem' }}>
                           {[
-                            { label: '🪪 IC Depan', path: media.ic_photo_url },
-                            { label: '🚗 Lesen Memandu', path: media.license_photo_url },
-                            { label: '📸 Selfie MyKad', path: media.selfie_ic_url }
+                            { label: '🪪 Front IC', path: media.ic_photo_url },
+                            { label: '🚗 Driving License', path: media.license_photo_url },
+                            { label: '📸 Selfie with MyKad', path: media.selfie_ic_url }
                           ].map(doc => {
                             const docUrl = doc.path ? supabase.storage.from('verification-documents').getPublicUrl(doc.path).data.publicUrl : '';
                             return (
@@ -509,7 +509,7 @@ export default function AdminDashboard() {
                                     <img src={docUrl} alt={doc.label} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                   </a>
                                 ) : (
-                                  <span style={{ fontSize: '0.7rem', color: 'var(--text-3)' }}>Tiada Gambar</span>
+                                  <span style={{ fontSize: '0.7rem', color: 'var(--text-3)' }}>No Image</span>
                                 )}
                               </div>
                             );
@@ -519,7 +519,7 @@ export default function AdminDashboard() {
                         {media.digital_signature_url && (
                           <div style={{ textAlign: 'left', marginBottom: '1rem' }}>
                             <a href={supabase.storage.from('verification-documents').getPublicUrl(media.digital_signature_url).data.publicUrl} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.8rem', color: 'var(--primary-2)', textDecoration: 'none', fontWeight: 600 }}>
-                              📄 Lihat E-Kontrak Perjanjian Peribadi (PDF)
+                              📄 View Private E-Agreement Contract (PDF)
                             </a>
                           </div>
                         )}
@@ -545,7 +545,7 @@ export default function AdminDashboard() {
                               border: 'none'
                             }}
                           >
-                            {approvedKycIds.includes(media.id) ? '✓ Selesai Diluluskan' : '✓ Luluskan KYC'}
+                            {approvedKycIds.includes(media.id) ? '✓ Approved Successfully' : '✓ Approve KYC'}
                           </button>
                         </div>
                       </div>
@@ -559,30 +559,30 @@ export default function AdminDashboard() {
           {/* ─── TAB 3: LOCATION SETTINGS ─── */}
           {activeTab === 'locations' && (
             <div className="card" style={{ maxWidth: '100%' }}>
-              <h2 className="section-title">🗺️ Urus Lokasi Pickup Kenderaan</h2>
-              <p className="section-subtitle">Tambah dan padamkan kawasan pickup rasmi untuk borang tempahan peminjam.</p>
+              <h2 className="section-title">🗺️ Urus Pickup Locations Kenderaan</h2>
+              <p className="section-subtitle">Add and delete official pickup zones for the borrower booking form.</p>
 
               {sqlError && (
                 <div style={{ background: 'rgba(251,191,36,0.1)', border: '1px solid rgba(251,191,36,0.3)', color: 'var(--warning)', padding: '1rem', borderRadius: 'var(--radius-md)', marginBottom: '1.5rem', fontSize: '0.82rem', lineHeight: 1.5 }}>
-                  ⚠️ **Jadual Database Belum Aktif**: Sila salin skrip SQL di dalam [implementation_plan.md](file:///C:/Users/Danial/.gemini/antigravity-ide/brain/b396ae78-ad61-4b0d-a8ef-ebe68cac14bd/implementation_plan.md) dan jalankannya di dashboard Supabase SQL Editor anda untuk membolehkan pengurusan lokasi pickup yang dinamik. Sistem kini menggunakan **senarai lalai (fallback)**.
+                  ⚠️ **Database Table Not Active**: Sila salin skrip SQL di dalam [implementation_plan.md](file:///C:/Users/Danial/.gemini/antigravity-ide/brain/b396ae78-ad61-4b0d-a8ef-ebe68cac14bd/implementation_plan.md) dan jalankannya di dashboard Supabase SQL Editor anda untuk membolehkan pengurusan lokasi pickup yang dinamik. Sistem kini menggunakan **senarai lalai (fallback)**.
                 </div>
               )}
 
               {/* Add Location Form */}
               <form onSubmit={handleAddLocation} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '1.25rem', marginBottom: '1.5rem' }}>
-                <h3 style={{ fontSize: '0.95rem', color: 'var(--primary-2)', marginBottom: '0.75rem', fontWeight: 700 }}>📍 Tambah Lokasi Pickup Baharu</h3>
+                <h3 style={{ fontSize: '0.95rem', color: 'var(--primary-2)', marginBottom: '0.75rem', fontWeight: 700 }}>📍 Tambah Pickup Locations Baharu</h3>
                 <div className="form-grid-2">
                   <div className="form-group">
-                    <label className="form-label">Nama Lokasi</label>
+                    <label className="form-label">Location Name</label>
                     <input type="text" value={newLocName} onChange={e => setNewLocName(e.target.value)} className="form-input" placeholder="cth: Stesen LRT Gombak" required />
                   </div>
                   <div className="form-group">
-                    <label className="form-label">Alamat / Perincian Tempat</label>
+                    <label className="form-label">Address / Location Details</label>
                     <input type="text" value={newLocAddress} onChange={e => setNewLocAddress(e.target.value)} className="form-input" placeholder="cth: Jalan Gombak, Kuala Lumpur" />
                   </div>
                 </div>
                 <button type="submit" className="btn btn-primary" style={{ marginTop: '0.5rem', padding: '0.5rem 1.25rem', fontSize: '0.82rem' }} disabled={actionLoading || sqlError}>
-                  {actionLoading ? '⏳ Memproses...' : '➕ Tambah Lokasi'}
+                  {actionLoading ? '⏳ Memproses...' : '➕ Add Location'}
                 </button>
               </form>
 
@@ -598,7 +598,7 @@ export default function AdminDashboard() {
                       onClick={() => handleDeleteLocation(loc.id)}
                       style={{ background: 'none', border: 'none', color: 'var(--error)', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}
                     >
-                      Padam
+                      Delete
                     </button>
                   </div>
                 ))}

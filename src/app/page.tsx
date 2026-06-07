@@ -26,7 +26,7 @@ export default function Home() {
       <div className="page" style={{ justifyContent: 'center' }}>
         <div style={{ textAlign: 'center' }}>
           <div style={{ width: 40, height: 40, border: '3px solid var(--border)', borderTopColor: 'var(--primary)', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 1rem' }} />
-          <p style={{ color: 'var(--text-3)', fontSize: '0.85rem' }}>Memuatkan...</p>
+          <p style={{ color: 'var(--text-3)', fontSize: '0.85rem' }}>Loading...</p>
         </div>
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
@@ -45,7 +45,7 @@ export default function Home() {
                 <polyline points="16 17 21 12 16 7"/>
                 <line x1="21" y1="12" x2="9" y2="12"/>
               </svg>
-              Log Keluar
+              Log Out
             </button>
           )}
         </div>
@@ -57,7 +57,7 @@ export default function Home() {
       {!session ? (
         <Auth />
       ) : (
-        <Suspense fallback={<div style={{ color: 'var(--text-3)', fontSize: '0.85rem' }}>Memuatkan borang...</div>}>
+        <Suspense fallback={<div style={{ color: 'var(--text-3)', fontSize: '0.85rem' }}>Loading form...</div>}>
           <WizardForm session={session} />
         </Suspense>
       )}

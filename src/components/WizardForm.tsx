@@ -294,7 +294,7 @@ export default function WizardForm({ session }: { session: Session | null }) {
     return totalDays() * 100;
   };
 
-  // Kos Cagaran Keselamatan (RM50)
+  // Kos Deposit Keselamatan (RM50)
   const calculateDeposit = () => {
     return 50;
   };
@@ -320,18 +320,18 @@ export default function WizardForm({ session }: { session: Session | null }) {
   const handleStep1Submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.startDateTime || !formData.endDateTime || !formData.fullName || !formData.icNumber || !formData.drivingLicense || !formData.address) {
-      alert('Sila lengkapkan semua maklumat tempahan dan profil.');
+      alert('Please complete all booking and profile details.');
       return;
     }
 
     // Process inline Auth if there is no active session
     if (!session) {
       if (!authEmail || !authPassword) {
-        alert('Sila masukkan alamat e-mel dan kata laluan untuk akaun anda.');
+        alert('Please enter your email and password for your account.');
         return;
       }
       if (!agreeToRegister) {
-        alert('Anda perlu bersetuju untuk mendaftar akaun untuk meneruskan.');
+        alert('You must agree to register an account to continue.');
         return;
       }
 
@@ -351,7 +351,7 @@ export default function WizardForm({ session }: { session: Session | null }) {
             }
           });
           if (error) throw error;
-          alert('Pendaftaran berjaya! Akaun anda telah dicipta.');
+          alert('Registration successful! Your account has been created.');
           setStep(2); // Go to KYC documents upload
         } else {
           // Sign In
@@ -372,7 +372,7 @@ export default function WizardForm({ session }: { session: Session | null }) {
           }
         }
       } catch (err: any) {
-        alert(`Ralat log masuk/pendaftaran: ${err.message}`);
+        alert(`Login/registration error: ${err.message}`);
       } finally {
         setAuthLoading(false);
       }
@@ -431,7 +431,7 @@ export default function WizardForm({ session }: { session: Session | null }) {
           setStep(4);
         } catch (err: any) {
           console.error(err);
-          alert('Ralat semasa menyediakan tempahan. Sila cuba semula.');
+          alert('Error preparing booking. Please try again.');
         } finally {
           setLoading(false);
         }
@@ -445,8 +445,8 @@ export default function WizardForm({ session }: { session: Session | null }) {
   // Step 3 Agreement Submit (KYC Users)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (sigCanvas.current?.isEmpty()) { alert('Sila tandatangan di dalam kotak yang disediakan.'); return; }
-    if (!agreement) { alert('Anda perlu bersetuju dengan syarat perjanjian.'); return; }
+    if (sigCanvas.current?.isEmpty()) { alert('Please sign inside the box provided.'); return; }
+    if (!agreement) { alert('You must agree to the terms of the agreement.'); return; }
     setLoading(true);
     try {
       const signatureImage = sigCanvas.current?.getTrimmedCanvas().toDataURL('image/png') as string;
@@ -550,7 +550,7 @@ export default function WizardForm({ session }: { session: Session | null }) {
       setStep(4);
     } catch (err) {
       console.error(err);
-      alert('Ralat semasa menghantar maklumat. Sila semak konsol.');
+      alert('Error submitting information. Please check the console.');
     } finally {
       setLoading(false);
     }
@@ -574,19 +574,19 @@ export default function WizardForm({ session }: { session: Session | null }) {
       if (data.url) { 
         window.location.href = data.url; 
       } else {
-        throw new Error('Tiada URL dari ToyyibPay');
+        throw new Error('No URL received from ToyyibPay');
       }
     } catch (err) {
       console.error(err);
-      alert('Gagal memulakan pembayaran. Sila cuba semula.');
+      alert('Failed to initiate payment. Please try again.');
       setLoading(false);
     }
   };
 
   const steps = [
-    { label: 'Tempahan', num: 1 },
-    { label: 'Dokumen', num: 2 },
-    { label: 'Perjanjian', num: 3 },
+    { label: 'Booking', num: 1 },
+    { label: 'Documents', num: 2 },
+    { label: 'Agreement', num: 3 },
   ];
 
   if (checkingBooking) {
@@ -594,7 +594,7 @@ export default function WizardForm({ session }: { session: Session | null }) {
       <div className="card" style={{ display: 'flex', justifyContent: 'center', padding: '3rem' }}>
         <div style={{ textAlign: 'center' }}>
           <div style={{ width: 40, height: 40, border: '3px solid var(--border)', borderTopColor: 'var(--primary)', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 1rem' }} />
-          <p style={{ color: 'var(--text-3)', fontSize: '0.85rem' }}>Menyemak status tempahan...</p>
+          <p style={{ color: 'var(--text-3)', fontSize: '0.85rem' }}>Checking booking status...</p>
         </div>
       </div>
     );
@@ -609,36 +609,36 @@ export default function WizardForm({ session }: { session: Session | null }) {
           {/* Welcome Header */}
           <div className="dash-welcome">
             <div className="dash-welcome-text">
-              <h2>Selamat Datang, {formData.fullName || session.user?.user_metadata?.fullName || 'Ahli'}! 👋</h2>
-              <p>Uruskan tempahan, dokumen, dan maklumat pemanduan anda.</p>
+              <h2>Welcome, {formData.fullName || session.user?.user_metadata?.fullName || 'Member'}! 👋</h2>
+              <p>Manage your bookings, documents, and driving information.</p>
             </div>
             <button 
               onClick={() => { setIsBookingMode(true); setStep(1); }} 
               className="btn btn-primary" 
               style={{ padding: '0.5rem 1rem', fontSize: '0.82rem' }}
             >
-              ➕ Tempah Proton Persona
+              ➕ Book Proton Persona
             </button>
           </div>
 
           {/* Stats Grid */}
           <div className="stats-grid">
             <div className="stat-card">
-              <div className="stat-card-label">Keahlian</div>
+              <div className="stat-card-label">Membership</div>
               <div className="stat-card-value" style={{ color: session.user?.user_metadata?.is_verified ? 'var(--success)' : 'var(--warning)' }}>
-                {session.user?.user_metadata?.is_verified ? '🛡️ DISAHKAN' : '⏳ KELULUSAN'}
+                {session.user?.user_metadata?.is_verified ? '🛡️ VERIFIED' : '⏳ PENDING'}
               </div>
             </div>
             <div className="stat-card">
-              <div className="stat-card-label">Jumlah Trip</div>
+              <div className="stat-card-label">Total Trips</div>
               <div className="stat-card-value" style={{ color: 'var(--primary-2)', fontSize: '1rem' }}>
-                {bookingHistory.length} trip
+                {bookingHistory.length} trips
               </div>
             </div>
             <div className="stat-card">
-              <div className="stat-card-label">Cagaran</div>
+              <div className="stat-card-label">Deposit</div>
               <div className="stat-card-value" style={{ color: activeBooking?.payment_status === 'Paid' ? 'var(--warning)' : 'var(--text-3)' }}>
-                {activeBooking?.payment_status === 'Paid' ? '🔒 RM50' : 'TIADA'}
+                {activeBooking?.payment_status === 'Paid' ? '🔒 RM50' : 'NONE'}
               </div>
             </div>
           </div>
@@ -647,9 +647,9 @@ export default function WizardForm({ session }: { session: Session | null }) {
           <div style={{ borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem', marginBottom: '1.25rem' }}>
             <div className="tab-scroll-wrap">
               {[
-                { id: 'active', label: '🚗 Trip Aktif' },
-                { id: 'history', label: '🕰️ Sejarah' },
-                { id: 'profile', label: '👤 Profil' }
+                { id: 'active', label: '🚗 Active Trip' },
+                { id: 'history', label: '🕰️ History' },
+                { id: 'profile', label: '👤 Profile' }
               ].map(tab => (
                 <button
                   key={tab.id}
@@ -680,7 +680,7 @@ export default function WizardForm({ session }: { session: Session | null }) {
               {activeBooking ? (
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.4rem' }}>
-                    <span className="badge badge-success">🚗 TEMPAHAN AKTIF (LUNAS)</span>
+                    <span className="badge badge-success">🚗 ACTIVE BOOKING (PAID)</span>
                     <span style={{ fontSize: '0.75rem', color: 'var(--text-3)', fontFamily: 'monospace' }}>#{activeBooking.id.slice(0, 8).toUpperCase()}</span>
                   </div>
 
@@ -688,27 +688,27 @@ export default function WizardForm({ session }: { session: Session | null }) {
                   <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '1rem 1.25rem', marginBottom: '1.25rem' }}>
                     <div className="trip-info-grid">
                       <div>
-                        <div className="trip-info-label">Mula Perjalanan:</div>
+                        <div className="trip-info-label">Trip Start:</div>
                         <div className="trip-info-value">{new Date(activeBooking.start_date_time || activeBooking.start_datetime).toLocaleString('ms-MY')}</div>
                       </div>
                       <div>
-                        <div className="trip-info-label">Tamat Perjalanan:</div>
+                        <div className="trip-info-label">Trip End:</div>
                         <div className="trip-info-value">{new Date(activeBooking.end_date_time || activeBooking.end_datetime).toLocaleString('ms-MY')}</div>
                       </div>
                       <div>
-                        <div className="trip-info-label">Model Kenderaan:</div>
+                        <div className="trip-info-label">Vehicle Model:</div>
                         <div className="trip-info-value">🚗 Proton Persona (Auto)</div>
                       </div>
                       <div>
-                        <div className="trip-info-label">Cagaran Keselamatan:</div>
-                        <div className="trip-info-value" style={{ color: 'var(--warning)' }}>RM 50.00 (Dipegang)</div>
+                        <div className="trip-info-label">Deposit Keselamatan:</div>
+                        <div className="trip-info-value" style={{ color: 'var(--warning)' }}>RM 50.00 (Held)</div>
                       </div>
                     </div>
                     
                     {contractUrl && (
                       <div style={{ marginTop: '1rem', paddingTop: '0.75rem', borderTop: '1px solid rgba(255,255,255,0.06)', textAlign: 'center' }}>
                         <a href={contractUrl} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.82rem', color: 'var(--primary-2)', textDecoration: 'none', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
-                          📄 Muat Turun Perjanjian Bertandatangan (PDF)
+                          📄 Download Signed Agreement (PDF)
                         </a>
                       </div>
                     )}
@@ -716,17 +716,17 @@ export default function WizardForm({ session }: { session: Session | null }) {
 
                   {/* Handover Upload Fasa 1 (Sebelum Trip) */}
                   <div className="handover-section">
-                    <h3 className="handover-section-title" style={{ color: 'var(--primary-2)' }}>📸 Fasa 1: Sebelum Mula Trip (Handover)</h3>
-                    <p className="handover-section-desc">Wajib dimuat naik sebelum mengambil kunci dan memandu kenderaan.</p>
+                    <h3 className="handover-section-title" style={{ color: 'var(--primary-2)' }}>📸 Phase 1: Before Trip Start (Handover)</h3>
+                    <p className="handover-section-desc">Must be uploaded before picking up the keys and driving the vehicle.</p>
                     <div className="photo-grid">
                       {/* Fuel Before */}
                       <div className="photo-upload-card">
-                        <div className="photo-upload-title">⛽ Minyak Sebelum</div>
+                        <div className="photo-upload-title">⛽ Fuel Before</div>
                         {handoverPhotos.fuelBefore ? (
                           <img src={handoverPhotos.fuelBefore} alt="Fuel Before" className="photo-thumb" />
                         ) : (
                           <label className="photo-upload-btn">
-                            📷 Ambil Foto
+                            📷 Take Photo
                             <input type="file" accept="image/*" capture="environment" onChange={e => { if (e.target.files?.[0]) handleUploadPhoto('fuelBefore', e.target.files[0]); }} style={{ display: 'none' }} />
                           </label>
                         )}
@@ -734,12 +734,12 @@ export default function WizardForm({ session }: { session: Session | null }) {
 
                       {/* Car Before */}
                       <div className="photo-upload-card">
-                        <div className="photo-upload-title">🚗 Fizikal Sebelum</div>
+                        <div className="photo-upload-title">🚗 Physical Before</div>
                         {handoverPhotos.carBefore ? (
                           <img src={handoverPhotos.carBefore} alt="Car Before" className="photo-thumb" />
                         ) : (
                           <label className="photo-upload-btn">
-                            📷 Ambil Foto
+                            📷 Take Photo
                             <input type="file" accept="image/*" capture="environment" onChange={e => { if (e.target.files?.[0]) handleUploadPhoto('carBefore', e.target.files[0]); }} style={{ display: 'none' }} />
                           </label>
                         )}
@@ -749,20 +749,20 @@ export default function WizardForm({ session }: { session: Session | null }) {
 
                   {/* Handover Upload Fasa 2 (Selepas Trip) */}
                   <div className="handover-section" style={{ marginBottom: '1.5rem' }}>
-                    <h3 className="handover-section-title" style={{ color: 'var(--purple)' }}>📸 Fasa 2: Selepas Tamat Trip (Return)</h3>
-                    <p className="handover-section-desc">Wajib dimuat naik sejurus sebelum mengembalikan kunci dan mengunci kenderaan.</p>
+                    <h3 className="handover-section-title" style={{ color: 'var(--purple)' }}>📸 Phase 2: After Trip End (Return)</h3>
+                    <p className="handover-section-desc">Must be uploaded immediately before returning keys and locking the vehicle.</p>
                     <div className="photo-grid">
                       {/* Fuel After */}
                       <div className="photo-upload-card">
-                        <div className="photo-upload-title">⛽ Minyak Selepas</div>
+                        <div className="photo-upload-title">⛽ Fuel After</div>
                         {handoverPhotos.fuelAfter ? (
                           <img src={handoverPhotos.fuelAfter} alt="Fuel After" className="photo-thumb" />
                         ) : (
                           (!handoverPhotos.fuelBefore || !handoverPhotos.carBefore) ? (
-                            <span className="photo-locked">🔒 Sila selesai Fasa 1</span>
+                            <span className="photo-locked">🔒 Please complete Phase 1</span>
                           ) : (
                             <label className="photo-upload-btn">
-                              📷 Ambil Foto
+                              📷 Take Photo
                               <input type="file" accept="image/*" capture="environment" onChange={e => { if (e.target.files?.[0]) handleUploadPhoto('fuelAfter', e.target.files[0]); }} style={{ display: 'none' }} />
                             </label>
                           )
@@ -771,15 +771,15 @@ export default function WizardForm({ session }: { session: Session | null }) {
 
                       {/* Car After */}
                       <div className="photo-upload-card">
-                        <div className="photo-upload-title">🚗 Fizikal Selepas</div>
+                        <div className="photo-upload-title">🚗 Physical After</div>
                         {handoverPhotos.carAfter ? (
                           <img src={handoverPhotos.carAfter} alt="Car After" className="photo-thumb" />
                         ) : (
                           (!handoverPhotos.fuelBefore || !handoverPhotos.carBefore) ? (
-                            <span className="photo-locked">🔒 Sila selesai Fasa 1</span>
+                            <span className="photo-locked">🔒 Please complete Phase 1</span>
                           ) : (
                             <label className="photo-upload-btn">
-                              📷 Ambil Foto
+                              📷 Take Photo
                               <input type="file" accept="image/*" capture="environment" onChange={e => { if (e.target.files?.[0]) handleUploadPhoto('carAfter', e.target.files[0]); }} style={{ display: 'none' }} />
                             </label>
                           )
@@ -789,21 +789,21 @@ export default function WizardForm({ session }: { session: Session | null }) {
                   </div>
 
                   <div style={{ textAlign: 'center', fontSize: '0.78rem', color: 'var(--text-3)' }}>
-                    ⚠️ Sila pastikan enjin kenderaan ditutup sepenuhnya selepas pemulangan disahkan di zon pickup. Enjin cut-off teknologi akan diaktifkan secara automatik sekiranya kenderaan keluar dari had perjalanan.
+                    ⚠️ Please ensure the vehicle engine is completely shut down after return is verified at the pickup zone. Engine cut-off technology will be activated automatically if the vehicle travels outside the permitted radius.
                   </div>
                 </div>
               ) : (
                 <div className="empty-state">
                   <div className="empty-state-icon">🍃</div>
-                  <h4 className="empty-state-title">Tiada Pemanduan Aktif Semasa</h4>
+                  <h4 className="empty-state-title">No Active Trip Currently</h4>
                   <p className="empty-state-desc">
-                    Anda tiada tempahan perjalanan kenderaan aktif buat masa sekarang. Klik di bawah untuk mula merancang perjalanan anda dengan Proton Persona!
+                    You have no active vehicle sharing trips at the moment. Click below to start booking your trip with the Proton Persona!
                   </p>
                   <button 
                     onClick={() => { setIsBookingMode(true); setStep(1); }} 
                     className="btn btn-primary"
                   >
-                    ➕ Mulakan Tempahan Kenderaan
+                    ➕ Start Vehicle Booking
                   </button>
                 </div>
               )}
@@ -813,9 +813,9 @@ export default function WizardForm({ session }: { session: Session | null }) {
           {/* Tab 2: Booking History */}
           {userTab === 'history' && (
             <div>
-              <h3 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.75rem', color: 'var(--text-1)' }}>🕰️ Rekod Perjalanan & Sumbangan Penyelenggaraan</h3>
+              <h3 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.75rem', color: 'var(--text-1)' }}>🕰️ Trip Records & Cost Contribution</h3>
               {bookingHistory.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '2rem 0', color: 'var(--text-3)', fontSize: '0.8rem' }}>Tiada sejarah tempahan direkodkan.</div>
+                <div style={{ textAlign: 'center', padding: '2rem 0', color: 'var(--text-3)', fontSize: '0.8rem' }}>No booking history recorded.</div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                   {bookingHistory.map(hist => (
@@ -826,12 +826,12 @@ export default function WizardForm({ session }: { session: Session | null }) {
                           hist.payment_status === 'Paid' ? 'badge-success' :
                           hist.payment_status === 'Cancelled' ? 'badge-error' : 'badge-pending'
                         }`}>
-                          {hist.payment_status === 'Paid' ? 'LUNAS' : hist.payment_status === 'Cancelled' ? 'BATAL' : 'PENDING'}
+                          {hist.payment_status === 'Paid' ? 'PAID' : hist.payment_status === 'Cancelled' ? 'CANCELLED' : 'PENDING'}
                         </span>
                       </div>
                       <div className="booking-hist-details">
-                        <div>📅 Mula: {new Date(hist.start_date_time || hist.start_datetime).toLocaleDateString('ms-MY')}</div>
-                        <div>📅 Tamat: {new Date(hist.end_date_time || hist.end_datetime).toLocaleDateString('ms-MY')}</div>
+                        <div>📅 Start: {new Date(hist.start_date_time || hist.start_datetime).toLocaleDateString('en-US')}</div>
+                        <div>📅 End: {new Date(hist.end_date_time || hist.end_datetime).toLocaleDateString('en-US')}</div>
                         <div>📍 {hist.pickup_location_name || 'Terminal KL Sentral'}</div>
                         <div>💰 RM {hist.maintenance_share_amount?.toFixed(2) || '0.00'}</div>
                       </div>
@@ -845,27 +845,27 @@ export default function WizardForm({ session }: { session: Session | null }) {
           {/* Tab 3: Member Profile Information */}
           {userTab === 'profile' && (
             <div>
-              <h3 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.75rem', color: 'var(--text-1)' }}>👤 Maklumat Profil Terperinci Ahli</h3>
+              <h3 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.75rem', color: 'var(--text-1)' }}>👤 Detailed Member Profile</h3>
               <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '1.25rem' }}>
                 <div>
                   <div className="profile-row">
-                    <span className="profile-row-label">Nama Penuh Ahli:</span>
+                    <span className="profile-row-label">Full Member Name:</span>
                     <span className="profile-row-value">{formData.fullName || 'N/A'}</span>
                   </div>
                   <div className="profile-row">
-                    <span className="profile-row-label">No. Kad Pengenalan:</span>
+                    <span className="profile-row-label">IC/ID Number:</span>
                     <span className="profile-row-value">{formData.icNumber || 'N/A'}</span>
                   </div>
                   <div className="profile-row">
-                    <span className="profile-row-label">No. Lesen Memandu:</span>
+                    <span className="profile-row-label">Driving License Number:</span>
                     <span className="profile-row-value">{formData.drivingLicense || 'N/A'}</span>
                   </div>
                   <div className="profile-row">
-                    <span className="profile-row-label">Alamat Tinggal:</span>
+                    <span className="profile-row-label">Home Address:</span>
                     <span className="profile-row-value">{formData.address || 'N/A'}</span>
                   </div>
                   <div className="profile-row">
-                    <span className="profile-row-label">Kenalan Kecemasan:</span>
+                    <span className="profile-row-label">Emergency Contact:</span>
                     <span className="profile-row-value">
                       {formData.emergencyContactName ? `${formData.emergencyContactName} (${formData.emergencyContactPhone})` : 'N/A'}
                     </span>
@@ -899,32 +899,32 @@ export default function WizardForm({ session }: { session: Session | null }) {
           {step === 1 && (
             <form onSubmit={handleStep1Submit}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.3rem' }}>
-                <h2 className="section-title">📅 Tempah Slot Perjalanan</h2>
+                <h2 className="section-title">📅 Book Trip Slot</h2>
                 {session && (
                   <button 
                     type="button" 
                     onClick={() => { setIsBookingMode(false); fetchActiveBooking(session.user); }}
                     style={{ background: 'none', border: 'none', color: 'var(--primary-2)', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}
                   >
-                    ← Buka Dashboard
+                    ← Open Dashboard
                   </button>
                 )}
               </div>
-              <p className="section-subtitle">Pilih tarikh pinjaman kenderaan Proton Persona secara terus</p>
+              <p className="section-subtitle">Select private vehicle sharing dates for the Proton Persona</p>
 
               <div className="form-grid-2">
                 <div className="form-group">
-                  <label className="form-label">Tarikh & Masa Mula</label>
+                  <label className="form-label">Start Date & Time</label>
                   <input type="datetime-local" name="startDateTime" value={formData.startDateTime} onChange={handleInput} className="form-input" required />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Tarikh & Masa Tamat</label>
+                  <label className="form-label">End Date & Time</label>
                   <input type="datetime-local" name="endDateTime" value={formData.endDateTime} onChange={handleInput} className="form-input" required />
                 </div>
               </div>
 
               <div className="form-group" style={{ marginTop: '1rem' }}>
-                <label className="form-label">📍 Pilih Lokasi Pickup Kenderaan</label>
+                <label className="form-label">📍 Select Vehicle Pickup Location</label>
                 <select 
                   name="pickupLocationName" 
                   value={formData.pickupLocationName} 
@@ -944,16 +944,16 @@ export default function WizardForm({ session }: { session: Session | null }) {
               {(formData.startDateTime && formData.endDateTime) && (
                 <div className="price-box" style={{ flexDirection: 'column', alignItems: 'stretch', gap: '0.75rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span className="price-box-label" style={{ fontSize: '0.85rem' }}>🗓 Kos Perkongsian Penyelenggaraan ({totalDays()} hari):</span>
+                    <span className="price-box-label" style={{ fontSize: '0.85rem' }}>🗓 Maintenance Sharing Cost ({totalDays()} days):</span>
                     <span style={{ fontWeight: 700, color: 'var(--text-1)' }}>RM {calculateMaintenanceOnly().toFixed(2)}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span className="price-box-label" style={{ fontSize: '0.85rem' }}>🔒 Wang Cagaran Keselamatan (Security Deposit - Dipulangkan):</span>
+                    <span className="price-box-label" style={{ fontSize: '0.85rem' }}>🔒 Wang Deposit Keselamatan (Security Deposit - Dipulangkan):</span>
                     <span style={{ fontWeight: 700, color: 'var(--text-1)' }}>RM {calculateDeposit().toFixed(2)}</span>
                   </div>
                   <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)', margin: '0.2rem 0' }} />
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span className="price-box-label" style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--primary-2)' }}>Jumlah Anggaran Bayaran:</span>
+                    <span className="price-box-label" style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--primary-2)' }}>Total Estimated Amount:</span>
                     <span className="price-box-amount" style={{ fontSize: '1.6rem' }}>RM {calculatePrice().toFixed(2)}</span>
                   </div>
                 </div>
@@ -962,38 +962,38 @@ export default function WizardForm({ session }: { session: Session | null }) {
               <div className="divider" />
 
               <div className="form-group">
-                <label className="form-label">Nama Penuh (seperti dalam IC)</label>
-                <input type="text" name="fullName" value={formData.fullName} onChange={handleInput} className="form-input" placeholder="cth: Ahmad Bin Ismail" required />
+                <label className="form-label">Full Name (as in IC/ID)</label>
+                <input type="text" name="fullName" value={formData.fullName} onChange={handleInput} className="form-input" placeholder="e.g., Ahmad Bin Ismail" required />
               </div>
 
               <div className="form-grid-2">
                 <div className="form-group">
-                  <label className="form-label">No. IC</label>
+                  <label className="form-label">IC/ID Number</label>
                   <input type="text" name="icNumber" value={formData.icNumber} onChange={handleInput} className="form-input" placeholder="xxxxxx-xx-xxxx" required />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">No. Lesen Memandu</label>
-                  <input type="text" name="drivingLicense" value={formData.drivingLicense} onChange={handleInput} className="form-input" placeholder="cth: D1234567" required />
+                  <label className="form-label">Driving License Number</label>
+                  <input type="text" name="drivingLicense" value={formData.drivingLicense} onChange={handleInput} className="form-input" placeholder="e.g., D1234567" required />
                 </div>
               </div>
 
               <div className="form-group">
-                <label className="form-label">Alamat Tempat Tinggal</label>
-                <textarea name="address" value={formData.address} onChange={handleInput} className="form-input form-textarea" rows={2} placeholder="No. rumah, jalan, bandar, negeri" required />
+                <label className="form-label">Home Address</label>
+                <textarea name="address" value={formData.address} onChange={handleInput} className="form-input form-textarea" rows={2} placeholder="House no., street, city, state" required />
               </div>
 
               <div className="form-group">
-                <label className="form-label">Kenalan Kecemasan (Ibu Bapa / Waris)</label>
+                <label className="form-label">Emergency Contact (Parent / Next of Kin)</label>
                 <div className="form-grid-2">
-                  <input type="text" name="emergencyContactName" placeholder="Nama penuh" value={formData.emergencyContactName} onChange={handleInput} className="form-input" required />
-                  <input type="tel" name="emergencyContactPhone" placeholder="cth: 012-3456789" value={formData.emergencyContactPhone} onChange={handleInput} className="form-input" required />
+                  <input type="text" name="emergencyContactName" placeholder="Full name" value={formData.emergencyContactName} onChange={handleInput} className="form-input" required />
+                  <input type="tel" name="emergencyContactPhone" placeholder="e.g., 012-3456789" value={formData.emergencyContactPhone} onChange={handleInput} className="form-input" required />
                 </div>
               </div>
 
               <div className="form-nav">
                 <div />
                 <button className="btn btn-primary" type="submit" disabled={loading}>
-                  {loading ? '⏳ Memproses...' : session?.user?.user_metadata?.is_verified ? '⚡ Tempah & Bayar Secara Terus' : 'Seterusnya →'}
+                  {loading ? '⏳ Processing...' : session?.user?.user_metadata?.is_verified ? '⚡ Book & Pay Directly' : 'Next →'}
                 </button>
               </div>
             </form>
@@ -1002,13 +1002,13 @@ export default function WizardForm({ session }: { session: Session | null }) {
           {/* ─── STEP 2: KYC Documents ─── */}
           {step === 2 && (
             <div>
-              <h2 className="section-title">🪪 Pengesahan Identiti (KYC)</h2>
-              <p className="section-subtitle">Muat naik dokumen sah untuk pengesahan satu kali akaun anda</p>
+              <h2 className="section-title">🪪 Identity Verification (KYC)</h2>
+              <p className="section-subtitle">Upload valid documents for a one-time account verification</p>
 
               {[
-                { name: 'icFront', label: 'Depan IC (MyKad)', icon: '🪪' },
-                { name: 'icBack', label: 'Belakang IC (MyKad)', icon: '🪪' },
-                { name: 'license', label: 'Kad Lesen Memandu', icon: '🚗' },
+                { name: 'icFront', label: 'Front of IC (MyKad)', icon: '🪪' },
+                { name: 'icBack', label: 'Back of IC (MyKad)', icon: '🪪' },
+                { name: 'license', label: 'Driving License Card', icon: '🚗' },
               ].map(item => (
                 <div className="upload-card" key={item.name}>
                   <div className="upload-card-label">
@@ -1020,14 +1020,14 @@ export default function WizardForm({ session }: { session: Session | null }) {
               ))}
 
               <div className="selfie-box">
-                <div className="selfie-box-title">📸 Foto Pengesahan Diri</div>
-                <p className="selfie-box-desc">Ambil gambar jelas dengan memegang IC anda di sebelah muka untuk pengesahan keselamatan.</p>
+                <div className="selfie-box-title">📸 Selfie Verification Photo</div>
+                <p className="selfie-box-desc">Take a clear photo holding your IC next to your face for security verification.</p>
                 <input type="file" name="selfie" accept="image/*" capture="user" onChange={handleFile} className="form-input" />
               </div>
 
               <div className="form-nav">
-                <button className="btn btn-secondary" onClick={prevStep}>← Kembali</button>
-                <button className="btn btn-primary" onClick={() => setStep(3)} disabled={!files.icFront || !files.icBack || !files.license || !files.selfie}>Seterusnya →</button>
+                <button className="btn btn-secondary" onClick={prevStep}>← Back</button>
+                <button className="btn btn-primary" onClick={() => setStep(3)} disabled={!files.icFront || !files.icBack || !files.license || !files.selfie}>Next →</button>
               </div>
             </div>
           )}
@@ -1035,30 +1035,30 @@ export default function WizardForm({ session }: { session: Session | null }) {
           {/* ─── STEP 3: Agreement & Signature ─── */}
           {step === 3 && (
             <div>
-              <h2 className="section-title">📜 Perjanjian & Tandatangan</h2>
-              <p className="section-subtitle">Sila baca dan tandatangani dokumen perjanjian Vehicle Bailment</p>
+              <h2 className="section-title">📜 Agreement & Signature</h2>
+              <p className="section-subtitle">Please read and sign the Vehicle Bailment Agreement document</p>
 
               {/* Premium T&C PDF link display */}
               <div style={{ background: 'rgba(139,92,246,0.06)', border: '1px solid rgba(139,92,246,0.25)', borderRadius: 'var(--radius-lg)', padding: '1.5rem', marginBottom: '1.5rem', textAlign: 'center' }}>
                 <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>📄</div>
-                <h4 style={{ fontSize: '1.05rem', fontWeight: 700, marginBottom: '0.4rem', color: 'var(--text-1)' }}>Terma & Syarat Pinjaman Kenderaan (PDF)</h4>
+                <h4 style={{ fontSize: '1.05rem', fontWeight: 700, marginBottom: '0.4rem', color: 'var(--text-1)' }}>Vehicle Sharing Terms & Conditions (PDF)</h4>
                 <p className="text-sm" style={{ color: 'var(--text-2)', marginBottom: '1rem', maxWidth: '380px', margin: '0 auto 1.25rem' }}>
-                  Terma ini mentakrifkan sumbangan saguhati, sistem enjin cut-off perjalanan, zon pickup, deposit RM50, caj overcharge, dan pemotongan cagaran.
+                  These terms define the cost contribution, automatic engine cut-off system, pickup zone, RM50 deposit, overcharge fees, and deposit deductions.
                 </p>
                 <a href="/api/tnc" target="_blank" className="btn btn-secondary" style={{ display: 'inline-flex', padding: '0.5rem 1.25rem', fontSize: '0.85rem', color: 'var(--primary-2)' }}>
-                  🌐 Baca Terma & Syarat (Buka PDF)
+                  🌐 Read Terms & Conditions (Open PDF)
                 </a>
               </div>
 
               <label className="agreement-row">
                 <input type="checkbox" checked={agreement} onChange={e => setAgreement(e.target.checked)} className="agreement-check" />
-                <span className="agreement-text">Saya telah membaca, memahami, dan bersetuju dengan semua syarat dalam dokumen PDF Terma & Syarat di atas.</span>
+                <span className="agreement-text">I have read, understood, and agreed to all conditions in the Terms & Conditions PDF document above.</span>
               </label>
 
               <div style={{ marginBottom: '1.25rem' }}>
                 <div className="sig-header">
-                  <span className="sig-label">Tandatangan Digital Anda</span>
-                  <button className="sig-clear" onClick={() => { sigCanvas.current?.clear(); setSigHasMark(false); }}>Padam</button>
+                  <span className="sig-label">Your Digital Signature</span>
+                  <button className="sig-clear" onClick={() => { sigCanvas.current?.clear(); setSigHasMark(false); }}>Clear</button>
                 </div>
                 <div className="signature-container">
                   <SignatureCanvas
@@ -1068,13 +1068,13 @@ export default function WizardForm({ session }: { session: Session | null }) {
                     onEnd={() => setSigHasMark(true)}
                   />
                 </div>
-                <p className="text-sm" style={{ color: 'var(--text-3)', marginTop: '0.3rem' }}>Sila tanda di atas kotak putih menggunakan jari atau tetikus anda</p>
+                <p className="text-sm" style={{ color: 'var(--text-3)', marginTop: '0.3rem' }}>Please sign inside the white box using your finger or mouse</p>
               </div>
 
               <div className="form-nav">
-                <button className="btn btn-secondary" onClick={prevStep} disabled={loading}>← Kembali</button>
+                <button className="btn btn-secondary" onClick={prevStep} disabled={loading}>← Back</button>
                 <button className="btn btn-primary" onClick={handleSubmit} disabled={loading || !agreement || !sigHasMark}>
-                  {loading ? '⏳ Memproses...' : '✍️ Tandatangan & Teruskan'}
+                  {loading ? '⏳ Processing...' : '✍️ Sign & Proceed'}
                 </button>
               </div>
             </div>
@@ -1083,29 +1083,29 @@ export default function WizardForm({ session }: { session: Session | null }) {
           {/* ─── STEP 4: Payment ─── */}
           {step === 4 && (
             <div className="payment-screen">
-              <div className="payment-badge">⚡ BAYARAN FPX DIPERLUKAN</div>
-              <h2 className="section-title" style={{ marginBottom: '0.35rem' }}>Selesaikan Pembayaran</h2>
-              <p className="text-sm text-text-2" style={{ marginBottom: 0 }}>Tempahan anda sedia untuk disahkan. Sila jelaskan bayaran untuk tempahan.</p>
+              <div className="payment-badge">⚡ FPX PAYMENT REQUIRED</div>
+              <h2 className="section-title" style={{ marginBottom: '0.35rem' }}>Complete Payment</h2>
+              <p className="text-sm text-text-2" style={{ marginBottom: 0 }}>Your booking is ready for confirmation. Please settle the payment.</p>
 
               <div className="payment-summary">
                 <div className="summary-row">
-                  <span className="summary-row-label">Kenderaan</span>
+                  <span className="summary-row-label">Vehicle</span>
                   <span className="summary-row-val">🚗 Proton Persona (Auto)</span>
                 </div>
                 <div className="summary-row">
-                  <span className="summary-row-label">Tempoh Pemanduan</span>
-                  <span className="summary-row-val">{totalDays()} hari</span>
+                  <span className="summary-row-label">Driving Duration</span>
+                  <span className="summary-row-val">{totalDays()} days</span>
                 </div>
                 <div className="summary-row">
-                  <span className="summary-row-label">Sumbangan Penyelenggaraan</span>
+                  <span className="summary-row-label">Maintenance Contribution</span>
                   <span className="summary-row-val">RM {calculateMaintenanceOnly().toFixed(2)}</span>
                 </div>
                 <div className="summary-row">
-                  <span className="summary-row-label">Cagaran Keselamatan (Deposit)</span>
+                  <span className="summary-row-label">Deposit Keselamatan (Deposit)</span>
                   <span className="summary-row-val">RM {calculateDeposit().toFixed(2)}</span>
                 </div>
                 <div className="summary-row summary-total">
-                  <span className="summary-row-label">Jumlah Caj Pembayaran</span>
+                  <span className="summary-row-label">Total Payment Amount</span>
                   <span className="summary-row-val">RM {calculatePrice().toFixed(2)}</span>
                 </div>
               </div>
@@ -1117,9 +1117,9 @@ export default function WizardForm({ session }: { session: Session | null }) {
               </div>
 
               <button className="btn-pay" onClick={handlePayment} disabled={loading}>
-                {loading ? '⏳ Membuka ToyyibPay...' : `💳 Bayar RM ${calculatePrice().toFixed(2)} via FPX`}
+                {loading ? '⏳ Redirecting to ToyyibPay...' : `💳 Pay RM ${calculatePrice().toFixed(2)} via FPX`}
               </button>
-              <p className="payment-note">Anda akan dibawa ke perbankan selamat ToyyibPay. Cagaran RM50 akan dipulangkan selepas pemulangan kenderaan selamat.</p>
+              <p className="payment-note">Anda akan dibawa ke perbankan selamat ToyyibPay. Deposit RM50 akan dipulangkan selepas pemulangan kenderaan selamat.</p>
             </div>
           )}
 
@@ -1131,15 +1131,15 @@ export default function WizardForm({ session }: { session: Session | null }) {
                   <polyline points="20 6 9 17 4 12"/>
                 </svg>
               </div>
-              <h2 className="success-title">Tempahan Berjaya! 🎉</h2>
-              <p className="text-sm" style={{ color: 'var(--text-3)', marginBottom: '1rem' }}>Maklumat anda disahkan, kontrak e-tandatangan telah dimuat naik, dan pembayaran telah disahkan.</p>
+              <h2 className="success-title">Booking Successful! 🎉</h2>
+              <p className="text-sm" style={{ color: 'var(--text-3)', marginBottom: '1rem' }}>Your information is verified, the e-signed contract has been uploaded, and your payment is confirmed.</p>
 
               <div className="success-cards" style={{ marginBottom: '1.5rem' }}>
                 {[
-                  { icon: '📄', label: 'Kontrak Perjanjian PDF telah dijana' },
-                  { icon: '🔒', label: 'Pengesahan KYC Ahli disimpan selamat' },
-                  { icon: '💳', label: 'Jumlah FPX (Sumbangan + Deposit) dibayar' },
-                  { icon: '🚗', label: 'Sila masuk Papan Pemuka untuk foto trip' },
+                  { icon: '📄', label: 'Agreement PDF contract generated' },
+                  { icon: '🔒', label: 'Member KYC verification stored securely' },
+                  { icon: '💳', label: 'FPX amount (Contribution + Deposit) paid' },
+                  { icon: '🚗', label: 'Please open Dashboard for trip photos' },
                 ].map(f => (
                   <div className="success-feat" key={f.label}>
                     <div className="success-feat-icon">{f.icon}</div>
@@ -1156,7 +1156,7 @@ export default function WizardForm({ session }: { session: Session | null }) {
                   setStep(1);
                 }
               }}>
-                🔌 Buka Papan Pemuka Peminjam
+                🔌 Open Borrower Dashboard
               </button>
             </div>
           )}

@@ -1565,7 +1565,7 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator {
 .auth-brand-header {
   margin: -2rem -2rem 1.5rem;
   padding: 1.25rem 2rem;
-  background: linear-gradient(135deg, rgba(14,165,233,0.18) 0%, rgba(167,139,250,0.12) 100%);
+  background: #ffffff;
   border-bottom: 1px solid rgba(14,165,233,0.2);
   border-radius: var(--radius-xl) var(--radius-xl) 0 0;
   text-align: center;
